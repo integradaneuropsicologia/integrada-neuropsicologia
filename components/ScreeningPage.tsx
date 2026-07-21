@@ -18,7 +18,7 @@ export function ScreeningPage({ screening }: { screening: Screening }) {
           <p className="screening-disclaimer"><strong>Antes de começar:</strong> este checklist promove reflexão e não é um instrumento diagnóstico. As respostas ficam somente nesta página e não são enviadas à clínica.</p>
           <ScreeningTest screening={screening} />
         </section>
-        <LeadForm context={screening.title} />
+        <LeadForm />
       </main>
       <SiteFooter />
     </>

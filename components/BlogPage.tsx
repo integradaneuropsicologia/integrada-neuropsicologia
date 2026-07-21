@@ -26,7 +26,7 @@ export function BlogPage() {
             </article>
           ))}
         </section>
-        <LeadForm context="Blog da Integrada" />
+        <LeadForm />
       </main>
       <SiteFooter />
     </>

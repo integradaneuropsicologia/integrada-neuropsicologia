@@ -19,15 +19,19 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Avaliação Neuropsicológica On-line para Adultos \| Integrada Neuropsicologia<\/title>/i);
+  assert.match(html, /<title>Avaliação Neuropsicológica On-line para Adultos \(18\+\) \| Integrada Neuropsicologia<\/title>/i);
   assert.match(html, /Entenda o que está por trás/);
-  assert.match(html, /Quero saber se é indicada para mim/);
-  assert.match(html, /avaliação neuropsicológica on-line para adultos/i);
-  assert.match(html, /Quero conversar sobre meu caso/);
+  assert.match(html, /foco, memória, organização e relacionamento/i);
+  assert.match(html, /Quero conversar com a equipe/);
+  assert.match(html, /Brasileiros com 18 anos ou mais/i);
+  assert.match(html, /Quero conversar sobre a avaliação/);
+  assert.match(html, /brasileiros no Brasil e em outros países/i);
+  assert.match(html, /Mais de 15 anos/);
   assert.match(html, /Carla Luciana da Conceição Lima/);
   assert.match(html, /CRP 08\/39739/);
-  assert.match(html, /src="\/assets\/online\.avif"/);
+  assert.match(html, /src="\/assets\/hero-online\.webp"/);
   assert.doesNotMatch(html, /src="\/assets\/hero-family\.avif"/);
+  assert.doesNotMatch(html, /triagem|Origem:|14\+ anos/i);
   assert.doesNotMatch(html, /\/_vinext\/image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });

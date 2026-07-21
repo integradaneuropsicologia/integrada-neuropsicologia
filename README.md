@@ -1,6 +1,6 @@
 # Integrada Neuropsicologia
 
-Site da Integrada Neuropsicologia, reconstruído em Next.js/vinext. A página inicial é uma landing page de captação para avaliação neuropsicológica on-line de adultos, com comunicação responsável, clara e orientada à conversão.
+Site da Integrada Neuropsicologia, reconstruído em Next.js/vinext. A página inicial é uma landing page de captação para avaliação neuropsicológica 100% on-line de brasileiros com 18 anos ou mais, no Brasil e no exterior, com comunicação responsável, clara e orientada à conversão.
 
 ## O que está incluído
 

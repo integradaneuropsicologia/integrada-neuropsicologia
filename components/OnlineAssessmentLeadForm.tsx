@@ -11,6 +11,8 @@ const interestOptions = [
   "Atenção, foco ou organização",
   "Suspeita de TDAH",
   "Suspeita de autismo (TEA)",
+  "Relacionamentos ou interação social",
+  "Sensibilidade sensorial ou necessidade de rotina",
   "Memória ou desempenho cognitivo",
   "Diferenciar ansiedade, burnout ou outro quadro",
   "Outro motivo",
@@ -27,11 +29,10 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
     const interest = String(data.get("interest") ?? "").trim();
     const message = String(data.get("message") ?? "").trim();
     const text = [
-      "Olá! Tenho interesse em avaliação neuropsicológica on-line para adultos.",
+      "Olá! Tenho interesse na avaliação neuropsicológica on-line para brasileiros com 18 anos ou mais.",
       `Nome: ${name}`,
       `Quero compreender melhor: ${interest}`,
       message ? `Contexto: ${message}` : null,
-      `Origem: landing page — ${placement === "hero" ? "primeira seção" : "seção de contato"}`,
     ].filter(Boolean).join("\n");
 
     setSubmitted(true);
@@ -43,9 +44,9 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
   return (
     <form className={`lp-lead-form lp-lead-form-${placement}`} onSubmit={handleSubmit}>
       <div className="lp-form-heading">
-        <span>Orientação inicial</span>
+        <span>Primeiro contato</span>
         <h2>Conte o que você quer entender.</h2>
-        <p>A equipe avalia sua demanda e explica se o formato on-line é adequado ao seu caso.</p>
+        <p>A equipe conhece sua demanda, explica como funciona a avaliação 100% on-line e orienta sobre os próximos passos.</p>
       </div>
 
       <label htmlFor={`${formId}-name`}>Como podemos chamar você?</label>
@@ -60,7 +61,7 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
       <label htmlFor={`${formId}-message`}>Quer acrescentar algo? <span>(opcional)</span></label>
       <textarea id={`${formId}-message`} name="message" rows={3} placeholder="Ex.: isso está afetando meu trabalho e minha rotina" />
 
-      <button type="submit" className="lp-primary-button lp-form-submit">Quero conversar sobre meu caso <span aria-hidden="true">→</span></button>
+      <button type="submit" className="lp-primary-button lp-form-submit">Quero conversar sobre a avaliação <span aria-hidden="true">→</span></button>
       <p className="lp-form-note">Os dados digitados preparam uma mensagem para a equipe no WhatsApp, que você revisa antes de enviar. Nada fica armazenado neste site. Não envie exames ou documentos neste primeiro contato.</p>
       {submitted && <p className="lp-form-status" role="status">Conversa preparada. Se o WhatsApp não abriu, envie novamente.</p>}
     </form>

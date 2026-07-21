@@ -30,7 +30,7 @@ export function ArticlePage({ post }: { post: BlogPost }) {
             <div className="article-cta"><div><span className="eyebrow">Precisa de orientação?</span><h2>Transforme dúvida em um próximo passo claro.</h2></div><a className="button button-green" href={whatsappUrl(`Olá! Li o artigo “${post.title}” e gostaria de orientação.`)} target="_blank" rel="noreferrer">Falar com a equipe</a></div>
           </div>
         </article>
-        <LeadForm context={`Artigo: ${post.title}`} />
+        <LeadForm />
       </main>
       <SiteFooter />
     </>

@@ -11,11 +11,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const origin = `${protocol}://${host}`;
   return {
     metadataBase: new URL(origin),
-    title: { default: "Avaliação Neuropsicológica On-line para Adultos | Integrada Neuropsicologia", template: "%s | Integrada Neuropsicologia" },
-    description: "Avaliação neuropsicológica on-line para adultos que querem compreender dificuldades de foco, memória e organização, com triagem responsável e orientação clara.",
+    title: { default: "Avaliação Neuropsicológica On-line para Adultos (18+) | Integrada Neuropsicologia", template: "%s | Integrada Neuropsicologia" },
+    description: "Avaliação neuropsicológica 100% on-line para pessoas com 18 anos ou mais, incluindo brasileiros no Brasil e no exterior, que desejam compreender dificuldades de foco, memória, organização e relacionamento.",
     icons: { icon: "/assets/logo.png", shortcut: "/assets/logo.png", apple: "/assets/logo.png" },
-    openGraph: { type: "website", locale: "pt_BR", siteName: "Integrada Neuropsicologia", title: "Avaliação Neuropsicológica On-line para Adultos", description: "Entenda o que está por trás das dificuldades de foco, memória e organização.", images: [{ url: `${origin}/og.png`, alt: "Avaliação neuropsicológica on-line para adultos — Integrada Neuropsicologia" }] },
-    twitter: { card: "summary_large_image", title: "Avaliação Neuropsicológica On-line para Adultos", description: "Entenda o que está por trás das dificuldades de foco, memória e organização.", images: [`${origin}/og.png`] },
+    openGraph: { type: "website", locale: "pt_BR", siteName: "Integrada Neuropsicologia", title: "Avaliação Neuropsicológica On-line para Adultos (18+)", description: "Entenda o que está por trás das dificuldades de foco, memória, organização e relacionamento.", images: [{ url: `${origin}/og.png`, alt: "Avaliação neuropsicológica on-line para pessoas com 18 anos ou mais — Integrada Neuropsicologia" }] },
+    twitter: { card: "summary_large_image", title: "Avaliação Neuropsicológica On-line para Adultos (18+)", description: "Entenda o que está por trás das dificuldades de foco, memória, organização e relacionamento.", images: [`${origin}/og.png`] },
   };
 }
 
