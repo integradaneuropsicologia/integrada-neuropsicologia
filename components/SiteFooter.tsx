@@ -15,7 +15,7 @@ export function SiteFooter() {
       <div className="footer-grid">
         <div className="footer-brand">
           <Link href="/" className="brand brand-footer">
-            <span className="brand-mark"><Image src="/assets/logo.png" alt="" width={32} height={32} /></span>
+            <span className="brand-mark"><Image src="/assets/logo.png" alt="" width={32} height={32} unoptimized /></span>
             <strong>Integrada Neuropsicologia</strong>
           </Link>
           <p>Rua Jacarezinho, 1266, Mercês<br />CEP 80810-130 — Curitiba/PR</p>

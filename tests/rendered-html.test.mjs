@@ -24,6 +24,8 @@ test("server-renders the branded home page", async () => {
   assert.match(html, /Falar com uma especialista/);
   assert.match(html, /Em todas as idades|cada fase da vida/);
   assert.match(html, /Receber orientação no WhatsApp/);
+  assert.match(html, /src="\/assets\/hero-family\.avif"/);
+  assert.doesNotMatch(html, /\/_vinext\/image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
 });
 

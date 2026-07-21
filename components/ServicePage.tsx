@@ -24,7 +24,7 @@ export function ServicePage({ data }: { data: ServicePageData }) {
             <a className="button button-green" href={contact} target="_blank" rel="noreferrer">{data.cta}</a>
             <p className="cta-note">Converse com a equipe e entenda o próximo passo mais adequado.</p>
           </div>
-          <div className="service-hero-image"><Image src={data.image} alt={data.imageAlt} width={760} height={720} sizes="(max-width: 860px) 100vw, 45vw" priority /></div>
+          <div className="service-hero-image"><Image src={data.image} alt={data.imageAlt} width={760} height={720} sizes="(max-width: 860px) 100vw, 45vw" priority unoptimized /></div>
         </section>
         <section className="trust-strip" aria-label="Diferenciais da clínica">
           <div><strong>14+ anos</strong><span>de experiência clínica</span></div>
