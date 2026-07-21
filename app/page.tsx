@@ -1,5 +1,6 @@
+/* eslint-disable @next/next/no-html-link-for-pages, @next/next/no-img-element */
 import type { Metadata } from "next";
-import Image from "next/image";
+import { CookieSettingsButton } from "@/components/CookieConsent";
 import { OnlineAssessmentLeadForm } from "@/components/OnlineAssessmentLeadForm";
 import { HOME_DESCRIPTION, HOME_TITLE, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo";
 import { whatsappUrl } from "@/lib/site-data";
@@ -7,6 +8,8 @@ import { whatsappUrl } from "@/lib/site-data";
 const directContact = whatsappUrl("Olá! Quero saber como funciona a avaliação neuropsicológica 100% on-line para brasileiros com 18 anos ou mais.");
 const googleReviewsUrl = "https://maps.app.goo.gl/UTfmE9ovaxSuGaCc9";
 const googleBusinessProfileUrl = "https://www.google.com/maps/place/Integrada+Neuropsicologia/@-25.4189171,-49.2934842,17z/data=!4m6!3m5!1s0x94dce739ecd69343:0x9f5ef5dec16989d1!8m2!3d-25.4189171!4d-49.2909093!16s%2Fg%2F11wf_7qw1b";
+
+export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
@@ -215,8 +218,8 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
       />
       <header className="lp-header">
-        <a className="lp-brand" href="#inicio" aria-label="Integrada Neuropsicologia — início">
-          <Image src="/assets/logo.png" alt="" width={38} height={38} priority unoptimized />
+        <a className="lp-brand" href="#inicio">
+          <img src="/assets/logo.png" alt="" width={38} height={38} decoding="async" />
           <span><strong>Integrada</strong><small>Neuropsicologia</small></span>
         </a>
         <nav className="lp-nav" aria-label="Navegação da landing page">
@@ -247,7 +250,7 @@ export default function Home() {
 
           <div className="lp-hero-panel">
             <div className="lp-hero-image">
-              <Image src="/assets/hero-online.webp" alt="Pessoa adulta participando de avaliação neuropsicológica on-line em ambiente privativo" width={1200} height={630} sizes="(max-width: 900px) 200vw, 84vw" priority unoptimized />
+              <img src="/assets/hero-online.webp" alt="Pessoa adulta participando de avaliação neuropsicológica on-line em ambiente privativo" width={1200} height={630} decoding="async" fetchPriority="low" />
               <div className="lp-image-badge"><strong>Mais de 15 anos</strong><span>de experiência clínica</span></div>
             </div>
             <OnlineAssessmentLeadForm placement="hero" />
@@ -340,7 +343,7 @@ export default function Home() {
             <h2 id="google-reviews-title">Consulte as experiências compartilhadas diretamente no Google.</h2>
             <p>Para preservar a privacidade de quem foi atendido, não reproduzimos relatos individuais neste site. As avaliações podem ser consultadas no perfil oficial da Integrada.</p>
           </div>
-          <a className="lp-google-reviews-card" href={googleReviewsUrl} target="_blank" rel="noreferrer" aria-label="Ver as avaliações públicas da Integrada Neuropsicologia no Google Maps">
+          <a className="lp-google-reviews-card" href={googleReviewsUrl} target="_blank" rel="noreferrer">
             <span className="lp-google-platform">Google Maps</span>
             <strong>Integrada Neuropsicologia</strong>
             <span>Avaliações publicadas no perfil oficial</span>
@@ -417,13 +420,13 @@ export default function Home() {
       </main>
 
       <footer className="lp-footer">
-        <div className="lp-footer-brand"><Image src="/assets/logo.png" alt="" width={38} height={38} unoptimized /><span><strong>Integrada Neuropsicologia</strong><small>Avaliando o presente, transformando o futuro.</small></span></div>
+        <div className="lp-footer-brand"><img src="/assets/logo.png" alt="" width={38} height={38} loading="lazy" decoding="async" /><span><strong>Integrada Neuropsicologia</strong><small>Avaliando o presente, transformando o futuro.</small></span></div>
         <div><strong>Atendimento</strong><span>On-line para pessoas com 18 anos ou mais — brasileiros no Brasil e em outros países</span><span>Responsável técnica: Carla Luciana da Conceição Lima • Psicóloga • CRP 08/39739</span><a href="tel:+5541992113665">(41) 99211-3665</a></div>
-        <div><strong>Endereço profissional</strong><span>Rua Jacarezinho, 1266, Mercês<br />CEP 80810-130 — Curitiba/PR</span></div>
+        <div><strong>Endereço profissional</strong><span>Rua Jacarezinho, 1266, Mercês<br />CEP 80810-130 — Curitiba/PR</span><a href="/politica-de-privacidade">Política de Privacidade</a><CookieSettingsButton className="lp-footer-cookie-button" /></div>
         <p>© {new Date().getFullYear()} Integrada Neuropsicologia. O conteúdo deste site é informativo e não substitui avaliação individual.</p>
       </footer>
 
-      <a className="lp-floating-cta" href={directContact} target="_blank" rel="noreferrer" aria-label="Conversar com a equipe pelo WhatsApp">Conversar pelo WhatsApp <span aria-hidden="true">→</span></a>
+      <a className="lp-floating-cta" href={directContact} target="_blank" rel="noreferrer">Conversar pelo WhatsApp <span aria-hidden="true">→</span></a>
     </div>
   );
 }

@@ -9,6 +9,7 @@ const consolidatedServiceSlugs = new Set(["avaliacaoonline", "avaliacaoneuropsic
 export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
     "/",
+    "/politica-de-privacidade",
     ...Object.keys(servicePages)
       .filter((slug) => !consolidatedServiceSlugs.has(slug))
       .map((slug) => `/${slug}`),

@@ -37,11 +37,18 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /Carla Luciana da Conceição Lima/);
   assert.match(html, /CRP 08\/39739/);
   assert.match(html, /src="\/assets\/hero-online\.webp"/);
+  assert.match(html, /Autorizo, de forma específica, o tratamento do meu nome/i);
+  assert.match(html, /O conteúdo do formulário não é armazenado no servidor deste site/i);
+  assert.match(html, /href="\/politica-de-privacidade"/i);
+  assert.match(html, /analytics_storage:\s*'denied'/i);
+  assert.match(html, /ad_personalization:\s*'denied'/i);
   assert.match(html, /"@type":"LocalBusiness"/);
   assert.match(html, /"@type":"Service"/);
   assert.match(html, /"requiredMinAge":18/);
   assert.doesNotMatch(html, /aggregateRating|"@type":"Review"|"@type":"FAQPage"/);
   assert.doesNotMatch(html, /src="\/assets\/hero-family\.avif"/);
+  assert.doesNotMatch(html, /Nada fica armazenado neste site/i);
+  assert.doesNotMatch(html, /googletagmanager\.com|google-analytics\.com/i);
   assert.doesNotMatch(html, /triagem|Origem:|14\+? anos/i);
   assert.doesNotMatch(html, /\/_vinext\/image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
@@ -61,8 +68,22 @@ test("publishes crawl directives and a canonical XML sitemap", async () => {
   const sitemap = await sitemapResponse.text();
   assert.match(sitemap, /https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/<\/loc>/i);
   assert.match(sitemap, /\/avaliacaotdah<\/loc>/i);
+  assert.match(sitemap, /\/politica-de-privacidade<\/loc>/i);
   assert.match(sitemap, /\/post\/tdah-ansiedade-ou-burnout-como-diferenciar-em-adultos<\/loc>/i);
   assert.doesNotMatch(sitemap, /\/avaliacaoonline<\/loc>|\/avaliacaoneuropsicologicaadulto<\/loc>/i);
+});
+
+test("publishes a complete privacy policy for form and cookie data", async () => {
+  const response = await render("/politica-de-privacidade");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /<title>Política de Privacidade \| Integrada Neuropsicologia<\/title>/i);
+  assert.match(html, /Os dados preenchidos apenas preparam a mensagem/i);
+  assert.match(html, /WhatsApp\/Meta/i);
+  assert.match(html, /Medição de audiência/i);
+  assert.match(html, /Publicidade e conversões/i);
+  assert.match(html, /Carla Luciana da Conceição Lima/i);
+  assert.match(html, /Preferências de cookies/i);
 });
 
 test("server-renders a service route", async () => {

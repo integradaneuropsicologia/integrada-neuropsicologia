@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useId, useState } from "react";
+import { canMeasureGenericEvents } from "@/components/CookieConsent";
 import { whatsappUrl } from "@/lib/site-data";
 
 type OnlineAssessmentLeadFormProps = {
@@ -33,8 +34,13 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
       `Nome: ${name}`,
       `Quero compreender melhor: ${interest}`,
       message ? `Contexto: ${message}` : null,
+      "Consentimento: autorizo o tratamento destes dados para preparar esta mensagem e responder ao meu contato pelo WhatsApp.",
     ].filter(Boolean).join("\n");
 
+    if (canMeasureGenericEvents()) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "whatsapp_lead_open", form_location: placement });
+    }
     setSubmitted(true);
     const opened = window.open(whatsappUrl(text), "_blank");
     if (opened) opened.opener = null;
@@ -61,8 +67,14 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
       <label htmlFor={`${formId}-message`}>Quer acrescentar algo? <span>(opcional)</span></label>
       <textarea id={`${formId}-message`} name="message" rows={3} placeholder="Ex.: isso está afetando meu trabalho e minha rotina" />
 
+      <label className="lp-form-consent" htmlFor={`${formId}-privacy`}>
+        <input id={`${formId}-privacy`} name="privacy-consent" type="checkbox" required />
+        <span>Autorizo, de forma específica, o tratamento do meu nome e das informações de saúde que eu escolher informar, exclusivamente para preparar esta mensagem e responder ao meu contato pelo WhatsApp. Posso revogar esta autorização pelo canal indicado na <a href="/politica-de-privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a>.</span>
+      </label>
+
       <button type="submit" className="lp-primary-button lp-form-submit">Quero conversar sobre a avaliação <span aria-hidden="true">→</span></button>
-      <p className="lp-form-note">Os dados digitados preparam uma mensagem para a equipe no WhatsApp, que você revisa antes de enviar. Nada fica armazenado neste site. Não envie exames ou documentos neste primeiro contato.</p>
+      <p className="lp-form-note">Os dados preenchidos apenas preparam a mensagem que você poderá revisar antes de enviá-la pelo WhatsApp. O conteúdo do formulário não é armazenado no servidor deste site. Depois do envio, a conversa será tratada pela Integrada Neuropsicologia e pelo WhatsApp/Meta. Informações de navegação e cookies são tratadas conforme suas preferências e nossa <a href="/politica-de-privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a>. Não envie exames ou documentos neste primeiro contato.</p>
+      <p className="lp-form-alternative">Prefere não informar sua dificuldade aqui? <a href={whatsappUrl("Olá! Gostaria de entender como funciona a avaliação neuropsicológica on-line para adultos.")} target="_blank" rel="noreferrer">Inicie uma conversa no WhatsApp sem preencher o formulário.</a></p>
       {submitted && <p className="lp-form-status" role="status">Conversa preparada. Se o WhatsApp não abriu, envie novamente.</p>}
     </form>
   );
