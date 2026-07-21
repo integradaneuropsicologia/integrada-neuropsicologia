@@ -27,6 +27,9 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /Quero conversar sobre a avaliação/);
   assert.match(html, /brasileiros no Brasil e em outros países/i);
   assert.match(html, /Mais de 15 anos/);
+  assert.match(html, /Consulte as experiências compartilhadas diretamente no Google/i);
+  assert.match(html, /https:\/\/maps\.app\.goo\.gl\/UTfmE9ovaxSuGaCc9/);
+  assert.match(html, /não reproduzimos relatos individuais neste site/i);
   assert.match(html, /Carla Luciana da Conceição Lima/);
   assert.match(html, /CRP 08\/39739/);
   assert.match(html, /src="\/assets\/hero-online\.webp"/);

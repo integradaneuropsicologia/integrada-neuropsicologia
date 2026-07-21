@@ -3,6 +3,7 @@ import { OnlineAssessmentLeadForm } from "@/components/OnlineAssessmentLeadForm"
 import { whatsappUrl } from "@/lib/site-data";
 
 const directContact = whatsappUrl("Olá! Quero saber como funciona a avaliação neuropsicológica 100% on-line para brasileiros com 18 anos ou mais.");
+const googleReviewsUrl = "https://maps.app.goo.gl/UTfmE9ovaxSuGaCc9";
 
 const signals = [
   ["Foco que escapa", "Você perde o fio em reuniões, leituras ou conversas, mesmo quando tenta prestar atenção."],
@@ -144,6 +145,20 @@ export default function Home() {
             <span className="lp-professional-mark" aria-hidden="true">CL</span>
             <div><span>Responsável técnica</span><h3>Carla Luciana da Conceição Lima</h3><p>Psicóloga • CRP 08/39739</p></div>
           </div>
+        </section>
+
+        <section className="lp-google-reviews" aria-labelledby="google-reviews-title">
+          <div className="lp-google-reviews-copy">
+            <span className="lp-section-label">Avaliações públicas</span>
+            <h2 id="google-reviews-title">Consulte as experiências compartilhadas diretamente no Google.</h2>
+            <p>Para preservar a privacidade de quem foi atendido, não reproduzimos relatos individuais neste site. As avaliações podem ser consultadas no perfil oficial da Integrada.</p>
+          </div>
+          <a className="lp-google-reviews-card" href={googleReviewsUrl} target="_blank" rel="noreferrer" aria-label="Ver as avaliações públicas da Integrada Neuropsicologia no Google Maps">
+            <span className="lp-google-platform">Google Maps</span>
+            <strong>Integrada Neuropsicologia</strong>
+            <span>Avaliações publicadas no perfil oficial</span>
+            <b>Ver avaliações no Google <i aria-hidden="true">↗</i></b>
+          </a>
         </section>
 
         <section className="lp-process" id="como-funciona">
