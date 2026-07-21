@@ -50,9 +50,7 @@ const worker = {
       const wixUrl = new URL(WIX_SITE_URL);
       wixUrl.pathname = url.pathname;
       wixUrl.search = url.search;
-      // Keep the split temporary until DNS and TLS have been verified. This
-      // becomes a cacheable 308 only after the custom-domain smoke test.
-      return Response.redirect(wixUrl, 307);
+      return Response.redirect(wixUrl, 308);
     }
 
     if (url.pathname === "/_vinext/image") {

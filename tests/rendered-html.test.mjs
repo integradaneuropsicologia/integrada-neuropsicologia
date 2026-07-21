@@ -22,7 +22,7 @@ test("server-renders the adult online assessment landing page", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>Avaliação Neuropsicológica Online para Adultos \| Integrada<\/title>/i);
-  assert.match(html, /<link rel="canonical" href="https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/avaliacao-neuropsicologica-online-adultos"/i);
+  assert.match(html, /<link rel="canonical" href="https:\/\/integradaneuropsicologia\.com\.br\/avaliacao-neuropsicologica-online-adultos"/i);
   assert.match(html, /name="description" content="Avaliação neuropsicológica 100% online para brasileiros com 18 anos ou mais/i);
   assert.match(html, /name="google-site-verification" content="WQqzIuO-fBHkrlX9jhelg58ubDCZEmVNLFnbivLY9os"/i);
   assert.match(html, /Avaliação neuropsicológica[^<]*<em>100% on-line para adultos/i);
@@ -47,13 +47,14 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /"@type":"LocalBusiness"/);
   assert.match(html, /"@type":"Service"/);
   assert.match(html, /"requiredMinAge":18/);
-  assert.match(html, /"url":"https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/avaliacao-neuropsicologica-online-adultos"/i);
+  assert.match(html, /"url":"https:\/\/integradaneuropsicologia\.com\.br\/avaliacao-neuropsicologica-online-adultos"/i);
   assert.match(html, /href="https:\/\/www\.integradaneuropsicologia\.com\.br\/avaliacaotdah"/i);
   assert.match(html, /href="https:\/\/www\.integradaneuropsicologia\.com\.br\/avaliacaoautismo"/i);
   assert.doesNotMatch(html, /aggregateRating|"@type":"Review"|"@type":"FAQPage"/);
   assert.doesNotMatch(html, /src="\/assets\/hero-family\.avif"/);
   assert.doesNotMatch(html, /Nada fica armazenado neste site/i);
   assert.doesNotMatch(html, /googletagmanager\.com|google-analytics\.com/i);
+  assert.doesNotMatch(html, /chatgpt\.site/i);
   assert.doesNotMatch(html, /triagem|Origem:|14\+? anos/i);
   assert.doesNotMatch(html, /\/_vinext\/image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
@@ -65,13 +66,13 @@ test("publishes crawl directives and a canonical XML sitemap", async () => {
   const robots = await robotsResponse.text();
   assert.match(robots, /User-Agent:\s*\*/i);
   assert.match(robots, /Allow:\s*\//i);
-  assert.match(robots, /Sitemap:\s*https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/sitemap\.xml/i);
+  assert.match(robots, /Sitemap:\s*https:\/\/integradaneuropsicologia\.com\.br\/sitemap\.xml/i);
 
   const sitemapResponse = await render("/sitemap.xml");
   assert.equal(sitemapResponse.status, 200);
   assert.match(sitemapResponse.headers.get("content-type") ?? "", /xml/i);
   const sitemap = await sitemapResponse.text();
-  assert.match(sitemap, /https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/avaliacao-neuropsicologica-online-adultos<\/loc>/i);
+  assert.match(sitemap, /https:\/\/integradaneuropsicologia\.com\.br\/avaliacao-neuropsicologica-online-adultos<\/loc>/i);
   assert.match(sitemap, /\/politica-de-privacidade<\/loc>/i);
   assert.doesNotMatch(sitemap, /\/avaliacaotdah<\/loc>|\/post\/|\/jogosdeestimula/i);
   assert.equal((sitemap.match(/<url>/g) ?? []).length, 2);
@@ -95,18 +96,18 @@ test("routes only the custom apex landing and privacy pages to Sites", async () 
   const apex = "integradaneuropsicologia.com.br";
 
   const rootResponse = await render("/", apex);
-  assert.ok([307, 308].includes(rootResponse.status));
+  assert.equal(rootResponse.status, 308);
   assert.equal(rootResponse.headers.get("location"), "https://www.integradaneuropsicologia.com.br/");
 
   const legacyResponse = await render("/avaliacaotdah?utm_source=teste", apex);
-  assert.ok([307, 308].includes(legacyResponse.status));
+  assert.equal(legacyResponse.status, 308);
   assert.equal(
     legacyResponse.headers.get("location"),
     "https://www.integradaneuropsicologia.com.br/avaliacaotdah?utm_source=teste",
   );
 
   const unicodeResponse = await render("/post/avalia%C3%A7%C3%A3o?gclid=abc123", apex);
-  assert.equal(unicodeResponse.status, 307);
+  assert.equal(unicodeResponse.status, 308);
   assert.equal(
     unicodeResponse.headers.get("location"),
     "https://www.integradaneuropsicologia.com.br/post/avalia%C3%A7%C3%A3o?gclid=abc123",

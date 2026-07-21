@@ -1,6 +1,4 @@
-// Keep the deployed Sites origin canonical until the custom-domain DNS and TLS
-// are active. The cutover changes only this constant after the smoke test.
-export const SITE_URL = "https://integrada-neuropsicologia.elieltonlimacosta.chatgpt.site";
+export const SITE_URL = "https://integradaneuropsicologia.com.br";
 export const MAIN_SITE_URL = "https://www.integradaneuropsicologia.com.br";
 export const LANDING_PATH = "/avaliacao-neuropsicologica-online-adultos";
 export const LANDING_URL = `${SITE_URL}${LANDING_PATH}`;
