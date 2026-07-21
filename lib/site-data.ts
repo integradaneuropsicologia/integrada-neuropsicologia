@@ -34,8 +34,8 @@ export const servicePages: Record<string, ServicePageData> = {
     imageAlt: "Criança em atividade de aprendizagem",
     whyTitle: "Por que a Integrada Neuropsicologia?",
     highlights: [
-      { title: "Mais de 14 anos de experiência", text: "Atendimento técnico e humanizado, com olhar clínico e escolar." },
-      { title: "Bateria completa de testes", text: "Instrumentos adequados à idade para um diagnóstico assertivo." },
+      { title: "Mais de 15 anos de experiência", text: "Atendimento técnico e humanizado, com olhar clínico e escolar." },
+      { title: "Bateria planejada para a demanda", text: "Procedimentos e instrumentos selecionados conforme a idade e os objetivos da avaliação." },
       { title: "Laudo claro e aplicável", text: "Recomendações práticas para casa, escola e rede de cuidado." },
       { title: "Visita à escola", text: "Contato com professores e observação da rotina para entender o contexto real." },
     ],
@@ -75,7 +75,7 @@ export const servicePages: Record<string, ServicePageData> = {
       { title: "Integração com a rede", text: "Encaminhamentos e diálogo com outros profissionais quando necessário." },
     ],
     signsTitle: "Se isso soa familiar, a avaliação pode ajudar",
-    signsIntro: "Sem medição, você tenta no escuro. Com diagnóstico, você escolhe o cuidado certo.",
+    signsIntro: "Uma investigação estruturada ajuda a organizar as hipóteses e a orientar os próximos passos.",
     signs: [
       "Atraso em prazos, pilhas de tarefas e apagões de memória.",
       "Procrastinação, impulsividade e desorganização crônica.",
@@ -131,7 +131,7 @@ export const servicePages: Record<string, ServicePageData> = {
   avaliacaotdah: {
     slug: "avaliacaotdah",
     eyebrow: "Avaliação de TDAH",
-    title: "TDAH sem achismo: diagnóstico claro para adultos e crianças.",
+    title: "Investigação cuidadosa de TDAH para adultos e crianças.",
     intro:
       "Foco, tempo e vida voltando ao eixo. Avaliação com laudo em 8 sessões, visita à escola quando infantil e devolutiva objetiva com plano de ação.",
     cta: "Quero investigar TDAH",
@@ -139,7 +139,7 @@ export const servicePages: Record<string, ServicePageData> = {
     imageAlt: "Pessoa organizando atividades durante uma avaliação",
     whyTitle: "Por que avaliar TDAH aqui?",
     highlights: [
-      { title: "Experiência clínica", text: "Mais de 14 anos acompanhando TDAH ao longo da vida." },
+      { title: "Experiência clínica", text: "Mais de 15 anos acompanhando diferentes demandas ao longo da vida." },
       { title: "Bateria completa", text: "Atenção, funções executivas, memória, linguagem e rastreios emocionais." },
       { title: "Laudo que vira ação", text: "Recomendações práticas para estudo, rotina e produtividade." },
       { title: "Integração com a rede", text: "Escola e psiquiatria incluídas quando necessário." },

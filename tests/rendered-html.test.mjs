@@ -19,7 +19,11 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Avaliação Neuropsicológica On-line para Adultos \(18\+\) \| Integrada Neuropsicologia<\/title>/i);
+  assert.match(html, /<title>Avaliação Neuropsicológica Online para Adultos \| Integrada<\/title>/i);
+  assert.match(html, /<link rel="canonical" href="https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/"/i);
+  assert.match(html, /name="description" content="Avaliação neuropsicológica 100% online para brasileiros com 18 anos ou mais/i);
+  assert.match(html, /name="google-site-verification" content="WQqzIuO-fBHkrlX9jhelg58ubDCZEmVNLFnbivLY9os"/i);
+  assert.match(html, /Avaliação neuropsicológica[^<]*<em>100% on-line para adultos/i);
   assert.match(html, /Entenda o que está por trás/);
   assert.match(html, /foco, memória, organização e relacionamento/i);
   assert.match(html, /Quero conversar com a equipe/);
@@ -33,10 +37,32 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /Carla Luciana da Conceição Lima/);
   assert.match(html, /CRP 08\/39739/);
   assert.match(html, /src="\/assets\/hero-online\.webp"/);
+  assert.match(html, /"@type":"LocalBusiness"/);
+  assert.match(html, /"@type":"Service"/);
+  assert.match(html, /"requiredMinAge":18/);
+  assert.doesNotMatch(html, /aggregateRating|"@type":"Review"|"@type":"FAQPage"/);
   assert.doesNotMatch(html, /src="\/assets\/hero-family\.avif"/);
-  assert.doesNotMatch(html, /triagem|Origem:|14\+ anos/i);
+  assert.doesNotMatch(html, /triagem|Origem:|14\+? anos/i);
   assert.doesNotMatch(html, /\/_vinext\/image/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape|react-loading-skeleton/i);
+});
+
+test("publishes crawl directives and a canonical XML sitemap", async () => {
+  const robotsResponse = await render("/robots.txt");
+  assert.equal(robotsResponse.status, 200);
+  const robots = await robotsResponse.text();
+  assert.match(robots, /User-Agent:\s*\*/i);
+  assert.match(robots, /Allow:\s*\//i);
+  assert.match(robots, /Sitemap:\s*https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/sitemap\.xml/i);
+
+  const sitemapResponse = await render("/sitemap.xml");
+  assert.equal(sitemapResponse.status, 200);
+  assert.match(sitemapResponse.headers.get("content-type") ?? "", /xml/i);
+  const sitemap = await sitemapResponse.text();
+  assert.match(sitemap, /https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/<\/loc>/i);
+  assert.match(sitemap, /\/avaliacaotdah<\/loc>/i);
+  assert.match(sitemap, /\/post\/tdah-ansiedade-ou-burnout-como-diferenciar-em-adultos<\/loc>/i);
+  assert.doesNotMatch(sitemap, /\/avaliacaoonline<\/loc>|\/avaliacaoneuropsicologicaadulto<\/loc>/i);
 });
 
 test("server-renders a service route", async () => {
@@ -94,6 +120,8 @@ test("all 20 named game routes render their own activity", async (context) => {
 
 test("legacy URLs redirect to their canonical pages", async () => {
   const redirects = [
+    ["/avaliacaoonline", "/"],
+    ["/avaliacaoneuropsicologicaadulto", "/"],
     ["/avaliacaoonlineautismo", "/avaliacaoautismo"],
     ["/blank-4", "/teste-tdah-infantil"],
     ["/blank-6", "/teste-autismo-adulto"],
