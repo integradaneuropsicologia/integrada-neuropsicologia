@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { CookieSettingsButton } from "@/components/CookieConsent";
+import { LANDING_PATH } from "@/lib/seo";
 import { whatsappUrl } from "@/lib/site-data";
 
 export const dynamic = "force-static";
@@ -26,18 +27,18 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="privacy-page">
       <header className="lp-header privacy-header">
-        <Link className="lp-brand" href="/">
+        <Link className="lp-brand" href={LANDING_PATH}>
           <Image src="/assets/logo.png" alt="" width={38} height={38} unoptimized />
           <span><strong>Integrada</strong><small>Neuropsicologia</small></span>
         </Link>
-        <Link className="lp-header-cta" href="/">Voltar à página inicial</Link>
+        <Link className="lp-header-cta" href={LANDING_PATH}>Voltar à avaliação</Link>
       </header>
 
       <main>
         <section className="privacy-hero">
           <span className="lp-section-label">Privacidade e proteção de dados</span>
           <h1>Política de Privacidade</h1>
-          <p>Esta política explica, em linguagem direta, como dados pessoais, informações preenchidas no formulário e preferências de cookies são tratados neste site.</p>
+          <p>Esta política explica, em linguagem direta, como dados pessoais, informações preenchidas no formulário e preferências de cookies são tratados nesta landing page de avaliação neuropsicológica on-line.</p>
           <time dateTime="2026-07-21">Última atualização: 21 de julho de 2026</time>
         </section>
 
@@ -84,6 +85,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2>5. Cookies e armazenamento no navegador</h2>
             <p>A escolha de privacidade é guardada localmente no seu navegador por até 180 dias. Esse registro é necessário para lembrar a sua decisão e não contém a informação digitada no formulário.</p>
+            <p>Essa escolha controla apenas esta landing page no domínio sem <code>www</code>. O site institucional em <a href="https://www.integradaneuropsicologia.com.br" target="_blank" rel="noreferrer">www.integradaneuropsicologia.com.br</a> é uma origem separada, hospedada no Wix, e pode apresentar preferências próprias.</p>
             <div className="privacy-table-wrap">
               <table>
                 <thead><tr><th>Categoria</th><th>Finalidade</th><th>Quando é usada</th></tr></thead>
@@ -130,7 +132,7 @@ export default function PrivacyPolicyPage() {
 
       <footer className="privacy-footer">
         <span>© {new Date().getFullYear()} Integrada Neuropsicologia</span>
-        <Link href="/">Avaliação neuropsicológica on-line para adultos</Link>
+        <Link href={LANDING_PATH}>Avaliação neuropsicológica on-line para adultos</Link>
       </footer>
     </div>
   );

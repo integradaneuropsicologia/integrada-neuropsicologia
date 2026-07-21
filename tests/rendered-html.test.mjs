@@ -1,26 +1,28 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-async function render(pathname = "/") {
+const landingPath = "/avaliacao-neuropsicologica-online-adultos";
+
+async function render(pathname = "/", hostname = "localhost") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-${pathname}`);
+  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-${hostname}-${pathname}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request(`http://localhost${pathname}`, { headers: { accept: "text/html" } }),
+    new Request(`https://${hostname}${pathname}`, { headers: { accept: "text/html" } }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
     { waitUntil() {}, passThroughOnException() {} },
   );
 }
 
 test("server-renders the adult online assessment landing page", async () => {
-  const response = await render();
+  const response = await render(landingPath);
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
   assert.match(html, /<title>Avaliação Neuropsicológica Online para Adultos \| Integrada<\/title>/i);
-  assert.match(html, /<link rel="canonical" href="https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/"/i);
+  assert.match(html, /<link rel="canonical" href="https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/avaliacao-neuropsicologica-online-adultos"/i);
   assert.match(html, /name="description" content="Avaliação neuropsicológica 100% online para brasileiros com 18 anos ou mais/i);
   assert.match(html, /name="google-site-verification" content="WQqzIuO-fBHkrlX9jhelg58ubDCZEmVNLFnbivLY9os"/i);
   assert.match(html, /Avaliação neuropsicológica[^<]*<em>100% on-line para adultos/i);
@@ -45,6 +47,9 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /"@type":"LocalBusiness"/);
   assert.match(html, /"@type":"Service"/);
   assert.match(html, /"requiredMinAge":18/);
+  assert.match(html, /"url":"https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/avaliacao-neuropsicologica-online-adultos"/i);
+  assert.match(html, /href="https:\/\/www\.integradaneuropsicologia\.com\.br\/avaliacaotdah"/i);
+  assert.match(html, /href="https:\/\/www\.integradaneuropsicologia\.com\.br\/avaliacaoautismo"/i);
   assert.doesNotMatch(html, /aggregateRating|"@type":"Review"|"@type":"FAQPage"/);
   assert.doesNotMatch(html, /src="\/assets\/hero-family\.avif"/);
   assert.doesNotMatch(html, /Nada fica armazenado neste site/i);
@@ -66,11 +71,10 @@ test("publishes crawl directives and a canonical XML sitemap", async () => {
   assert.equal(sitemapResponse.status, 200);
   assert.match(sitemapResponse.headers.get("content-type") ?? "", /xml/i);
   const sitemap = await sitemapResponse.text();
-  assert.match(sitemap, /https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/<\/loc>/i);
-  assert.match(sitemap, /\/avaliacaotdah<\/loc>/i);
+  assert.match(sitemap, /https:\/\/integrada-neuropsicologia\.elieltonlimacosta\.chatgpt\.site\/avaliacao-neuropsicologica-online-adultos<\/loc>/i);
   assert.match(sitemap, /\/politica-de-privacidade<\/loc>/i);
-  assert.match(sitemap, /\/post\/tdah-ansiedade-ou-burnout-como-diferenciar-em-adultos<\/loc>/i);
-  assert.doesNotMatch(sitemap, /\/avaliacaoonline<\/loc>|\/avaliacaoneuropsicologicaadulto<\/loc>/i);
+  assert.doesNotMatch(sitemap, /\/avaliacaotdah<\/loc>|\/post\/|\/jogosdeestimula/i);
+  assert.equal((sitemap.match(/<url>/g) ?? []).length, 2);
 });
 
 test("publishes a complete privacy policy for form and cookie data", async () => {
@@ -84,6 +88,38 @@ test("publishes a complete privacy policy for form and cookie data", async () =>
   assert.match(html, /Publicidade e conversões/i);
   assert.match(html, /Carla Luciana da Conceição Lima/i);
   assert.match(html, /Preferências de cookies/i);
+  assert.match(html, /href="\/avaliacao-neuropsicologica-online-adultos"/i);
+});
+
+test("routes only the custom apex landing and privacy pages to Sites", async () => {
+  const apex = "integradaneuropsicologia.com.br";
+
+  const rootResponse = await render("/", apex);
+  assert.ok([307, 308].includes(rootResponse.status));
+  assert.equal(rootResponse.headers.get("location"), "https://www.integradaneuropsicologia.com.br/");
+
+  const legacyResponse = await render("/avaliacaotdah?utm_source=teste", apex);
+  assert.ok([307, 308].includes(legacyResponse.status));
+  assert.equal(
+    legacyResponse.headers.get("location"),
+    "https://www.integradaneuropsicologia.com.br/avaliacaotdah?utm_source=teste",
+  );
+
+  const unicodeResponse = await render("/post/avalia%C3%A7%C3%A3o?gclid=abc123", apex);
+  assert.equal(unicodeResponse.status, 307);
+  assert.equal(
+    unicodeResponse.headers.get("location"),
+    "https://www.integradaneuropsicologia.com.br/post/avalia%C3%A7%C3%A3o?gclid=abc123",
+  );
+
+  const landingResponse = await render(`${landingPath}?utm_source=google`, apex);
+  assert.equal(landingResponse.status, 200);
+
+  const privacyResponse = await render("/politica-de-privacidade", apex);
+  assert.equal(privacyResponse.status, 200);
+
+  const assetResponse = await render("/assets/logo.png", apex);
+  assert.equal(assetResponse.headers.get("location"), null);
 });
 
 test("server-renders a service route", async () => {
@@ -141,8 +177,8 @@ test("all 20 named game routes render their own activity", async (context) => {
 
 test("legacy URLs redirect to their canonical pages", async () => {
   const redirects = [
-    ["/avaliacaoonline", "/"],
-    ["/avaliacaoneuropsicologicaadulto", "/"],
+    ["/avaliacaoonline", landingPath],
+    ["/avaliacaoneuropsicologicaadulto", landingPath],
     ["/avaliacaoonlineautismo", "/avaliacaoautismo"],
     ["/blank-4", "/teste-tdah-infantil"],
     ["/blank-6", "/teste-autismo-adulto"],

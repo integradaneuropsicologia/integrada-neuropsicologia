@@ -370,8 +370,8 @@ export const servicePages: Record<string, ServicePageData> = {
 
 export const evaluationNav = [
   ["Avaliação infantil", "/avaliacaoinfantil"],
-  ["Avaliação adulta", "/avaliacaoneuropsicologicaadulto"],
-  ["Avaliação on-line", "/avaliacaoonline"],
+  ["Avaliação adulta", "/avaliacao-neuropsicologica-online-adultos"],
+  ["Avaliação on-line", "/avaliacao-neuropsicologica-online-adultos"],
   ["Avaliação TDAH", "/avaliacaotdah"],
   ["Avaliação TEA", "/avaliacaoautismo"],
   ["Avaliação do idoso", "/avaliacaoneuropsicologicaidoso"],

@@ -6,6 +6,7 @@ import { GamesPage } from "@/components/GamesPage";
 import { ScreeningPage } from "@/components/ScreeningPage";
 import { ServicePage } from "@/components/ServicePage";
 import { gameBySlug, gameLibrary } from "@/lib/game-data";
+import { LANDING_PATH, mainSiteUrl } from "@/lib/seo";
 import { screenings, servicePages } from "@/lib/site-data";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -13,12 +14,12 @@ type PageProps = { params: Promise<{ slug: string }> };
 const pageMetadata = (slug: string, title: string, description: string): Metadata => ({
   title,
   description,
-  alternates: { canonical: `/${slug}` },
+  alternates: { canonical: mainSiteUrl(`/${slug}`) },
   openGraph: {
     type: "website",
     locale: "pt_BR",
     siteName: "Integrada Neuropsicologia",
-    url: `/${slug}`,
+    url: mainSiteUrl(`/${slug}`),
     title,
     description,
     images: [{ url: "/og.png", width: 1731, height: 909, alt: "Integrada Neuropsicologia" }],
@@ -43,7 +44,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   if (slug === "avaliacaoonline" || slug === "avaliacaoneuropsicologicaadulto") {
-    return { title: { absolute: "Avaliação Neuropsicológica Online para Adultos | Integrada" }, alternates: { canonical: "/" } };
+    return { title: { absolute: "Avaliação Neuropsicológica Online para Adultos | Integrada" }, alternates: { canonical: LANDING_PATH } };
   }
   if (servicePages[slug]) return pageMetadata(slug, servicePages[slug].eyebrow, servicePages[slug].intro);
   if (screenings[slug]) return pageMetadata(slug, `${screenings[slug].title} | Checklist gratuito`, screenings[slug].description);
@@ -55,7 +56,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function DynamicPage({ params }: PageProps) {
   const { slug } = await params;
-  if (slug === "avaliacaoonline" || slug === "avaliacaoneuropsicologicaadulto") permanentRedirect("/");
+  if (slug === "avaliacaoonline" || slug === "avaliacaoneuropsicologicaadulto") permanentRedirect(LANDING_PATH);
   if (slug === "avaliacaoonlineautismo") permanentRedirect("/avaliacaoautismo");
   if (slug === "blank-4") permanentRedirect("/teste-tdah-infantil");
   if (slug === "blank-6") permanentRedirect("/teste-autismo-adulto");

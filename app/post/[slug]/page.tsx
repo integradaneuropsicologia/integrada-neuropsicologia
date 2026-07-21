@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticlePage } from "@/components/ArticlePage";
 import { blogPostBySlug, blogPosts } from "@/lib/blog-data";
+import { mainSiteUrl } from "@/lib/seo";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -16,12 +17,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: { canonical: `/post/${slug}` },
+    alternates: { canonical: mainSiteUrl(`/post/${slug}`) },
     openGraph: {
       type: "article",
       locale: "pt_BR",
       siteName: "Integrada Neuropsicologia",
-      url: `/post/${slug}`,
+      url: mainSiteUrl(`/post/${slug}`),
       title: post.title,
       description: post.excerpt,
       images: [{ url: "/og.png", width: 1731, height: 909, alt: post.title }],

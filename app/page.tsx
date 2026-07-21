@@ -2,7 +2,16 @@
 import type { Metadata } from "next";
 import { CookieSettingsButton } from "@/components/CookieConsent";
 import { OnlineAssessmentLeadForm } from "@/components/OnlineAssessmentLeadForm";
-import { HOME_DESCRIPTION, HOME_TITLE, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/seo";
+import {
+  HOME_DESCRIPTION,
+  HOME_TITLE,
+  LANDING_PATH,
+  LANDING_URL,
+  MAIN_SITE_URL,
+  SITE_NAME,
+  absoluteUrl,
+  mainSiteUrl,
+} from "@/lib/seo";
 import { whatsappUrl } from "@/lib/site-data";
 
 const directContact = whatsappUrl("Olá! Quero saber como funciona a avaliação neuropsicológica 100% on-line para brasileiros com 18 anos ou mais.");
@@ -14,11 +23,11 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },
   description: HOME_DESCRIPTION,
-  alternates: { canonical: "/" },
+  alternates: { canonical: LANDING_PATH },
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "/",
+    url: LANDING_PATH,
     siteName: SITE_NAME,
     title: "Avaliação Neuropsicológica Online para Adultos (18+)",
     description: "Avaliação 100% online para brasileiros adultos, no Brasil e no exterior, com investigação de foco, memória, organização e relacionamentos.",
@@ -42,29 +51,29 @@ const structuredData = {
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": `${SITE_URL}/#website`,
-      url: `${SITE_URL}/`,
+      "@id": `${MAIN_SITE_URL}/#website`,
+      url: `${MAIN_SITE_URL}/`,
       name: SITE_NAME,
       inLanguage: "pt-BR",
-      publisher: { "@id": `${SITE_URL}/#organization` },
+      publisher: { "@id": `${MAIN_SITE_URL}/#organization` },
     },
     {
       "@type": "WebPage",
-      "@id": `${SITE_URL}/#webpage`,
-      url: `${SITE_URL}/`,
+      "@id": `${LANDING_URL}#webpage`,
+      url: LANDING_URL,
       name: HOME_TITLE,
       description: HOME_DESCRIPTION,
       dateModified: "2026-07-21",
-      isPartOf: { "@id": `${SITE_URL}/#website` },
-      about: { "@id": `${SITE_URL}/#service` },
-      mainEntity: { "@id": `${SITE_URL}/#service` },
-      primaryImageOfPage: { "@id": `${SITE_URL}/#primaryimage` },
-      publisher: { "@id": `${SITE_URL}/#organization` },
+      isPartOf: { "@id": `${MAIN_SITE_URL}/#website` },
+      about: { "@id": `${LANDING_URL}#service` },
+      mainEntity: { "@id": `${LANDING_URL}#service` },
+      primaryImageOfPage: { "@id": `${LANDING_URL}#primaryimage` },
+      publisher: { "@id": `${MAIN_SITE_URL}/#organization` },
       inLanguage: "pt-BR",
     },
     {
       "@type": "ImageObject",
-      "@id": `${SITE_URL}/#primaryimage`,
+      "@id": `${LANDING_URL}#primaryimage`,
       url: absoluteUrl("/assets/hero-online.webp"),
       contentUrl: absoluteUrl("/assets/hero-online.webp"),
       width: 1200,
@@ -73,9 +82,9 @@ const structuredData = {
     },
     {
       "@type": "LocalBusiness",
-      "@id": `${SITE_URL}/#organization`,
+      "@id": `${MAIN_SITE_URL}/#organization`,
       name: SITE_NAME,
-      url: `${SITE_URL}/`,
+      url: `${MAIN_SITE_URL}/`,
       description: "Avaliação neuropsicológica 100% online para brasileiros com 18 anos ou mais, no Brasil e no exterior.",
       telephone: "+5541992113665",
       logo: {
@@ -84,7 +93,7 @@ const structuredData = {
         width: 500,
         height: 500,
       },
-      image: { "@id": `${SITE_URL}/#primaryimage` },
+      image: { "@id": `${LANDING_URL}#primaryimage` },
       address: {
         "@type": "PostalAddress",
         streetAddress: "Rua Jacarezinho, 1266, Mercês",
@@ -103,11 +112,11 @@ const structuredData = {
         { "@type": "Country", name: "Brasil" },
         "Brasileiros residentes no exterior",
       ],
-      employee: { "@id": `${SITE_URL}/#carla` },
+      employee: { "@id": `${MAIN_SITE_URL}/#carla` },
     },
     {
       "@type": "Person",
-      "@id": `${SITE_URL}/#carla`,
+      "@id": `${MAIN_SITE_URL}/#carla`,
       name: "Carla Luciana da Conceição Lima",
       jobTitle: "Psicóloga e responsável técnica",
       identifier: {
@@ -115,15 +124,15 @@ const structuredData = {
         propertyID: "CRP",
         value: "08/39739",
       },
-      worksFor: { "@id": `${SITE_URL}/#organization` },
+      worksFor: { "@id": `${MAIN_SITE_URL}/#organization` },
     },
     {
       "@type": "Service",
-      "@id": `${SITE_URL}/#service`,
+      "@id": `${LANDING_URL}#service`,
       name: "Avaliação neuropsicológica online para adultos",
       serviceType: "Avaliação neuropsicológica 100% online",
       description: "Processo clínico para compreender dificuldades de foco, memória, organização e relacionamento, com devolutiva individual e orientação sobre os próximos passos.",
-      provider: { "@id": `${SITE_URL}/#organization` },
+      provider: { "@id": `${MAIN_SITE_URL}/#organization` },
       areaServed: [
         { "@type": "Country", name: "Brasil" },
         "Brasileiros residentes no exterior",
@@ -135,7 +144,7 @@ const structuredData = {
       },
       availableChannel: {
         "@type": "ServiceChannel",
-        serviceUrl: `${SITE_URL}/`,
+        serviceUrl: LANDING_URL,
         availableLanguage: "Português",
       },
     },
@@ -165,25 +174,25 @@ const investigationTopics = [
   {
     title: "TDAH em adultos",
     text: "Atenção, impulsividade, memória de trabalho, organização e o impacto desses padrões em diferentes fases da vida.",
-    href: "/avaliacaotdah",
+    href: mainSiteUrl("/avaliacaotdah"),
     link: "Entender a investigação de TDAH",
   },
   {
     title: "Autismo na vida adulta",
     text: "Comunicação, interação social, flexibilidade, sensibilidades sensoriais e estratégias de adaptação construídas ao longo da vida.",
-    href: "/avaliacaoautismo",
+    href: mainSiteUrl("/avaliacaoautismo"),
     link: "Entender a investigação de autismo",
   },
   {
     title: "Memória e funções executivas",
     text: "Como atenção, memória, planejamento, velocidade de processamento e tomada de decisão se relacionam com as dificuldades atuais.",
-    href: "/post/avaliação-neuropsicológica-x-avaliação-neurológica-qual-é-a-diferença",
+    href: mainSiteUrl("/post/avaliação-neuropsicológica-x-avaliação-neurológica-qual-é-a-diferença"),
     link: "Entender o que a avaliação investiga",
   },
   {
     title: "Hipóteses que podem se confundir",
     text: "TDAH, ansiedade e burnout podem compartilhar sinais. A avaliação considera história, contexto e impacto funcional para olhar o conjunto.",
-    href: "/post/tdah-ansiedade-ou-burnout-como-diferenciar-em-adultos",
+    href: mainSiteUrl("/post/tdah-ansiedade-ou-burnout-como-diferenciar-em-adultos"),
     link: "Ler sobre TDAH, ansiedade e burnout",
   },
 ] as const;

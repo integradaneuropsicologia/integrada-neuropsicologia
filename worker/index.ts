@@ -18,6 +18,24 @@ interface ExecutionContext {
   passThroughOnException(): void;
 }
 
+const APEX_HOST = "integradaneuropsicologia.com.br";
+const WIX_SITE_URL = "https://www.integradaneuropsicologia.com.br";
+const LANDING_PATH = "/avaliacao-neuropsicologica-online-adultos";
+
+const isSitesPath = (pathname: string) =>
+  pathname === LANDING_PATH ||
+  pathname === `${LANDING_PATH}/` ||
+  pathname === "/politica-de-privacidade" ||
+  pathname === "/politica-de-privacidade/" ||
+  pathname === "/robots.txt" ||
+  pathname === "/sitemap.xml" ||
+  pathname === "/og.png" ||
+  pathname.startsWith("/.well-known/") ||
+  pathname.startsWith("/assets/") ||
+  pathname.startsWith("/cdn-cgi/") ||
+  pathname.startsWith("/_next/") ||
+  pathname.startsWith("/_vinext/");
+
 // Image security config. SVG sources with .svg extension auto-skip the
 // optimization endpoint on the client side (served directly, no proxy).
 // To route SVGs through the optimizer (with security headers), set
@@ -27,6 +45,15 @@ interface ExecutionContext {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.hostname === APEX_HOST && !isSitesPath(url.pathname)) {
+      const wixUrl = new URL(WIX_SITE_URL);
+      wixUrl.pathname = url.pathname;
+      wixUrl.search = url.search;
+      // Keep the split temporary until DNS and TLS have been verified. This
+      // becomes a cacheable 308 only after the custom-domain smoke test.
+      return Response.redirect(wixUrl, 307);
+    }
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
