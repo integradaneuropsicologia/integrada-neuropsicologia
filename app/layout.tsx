@@ -11,11 +11,11 @@ export async function generateMetadata(): Promise<Metadata> {
   const origin = `${protocol}://${host}`;
   return {
     metadataBase: new URL(origin),
-    title: { default: "Integrada Neuropsicologia", template: "%s | Integrada Neuropsicologia" },
-    description: "Avaliação neuropsicológica e psicoterapia em Curitiba e on-line, com atendimento humanizado e laudos claros.",
+    title: { default: "Avaliação Neuropsicológica On-line para Adultos | Integrada Neuropsicologia", template: "%s | Integrada Neuropsicologia" },
+    description: "Avaliação neuropsicológica on-line para adultos que querem compreender dificuldades de foco, memória e organização, com triagem responsável e orientação clara.",
     icons: { icon: "/assets/logo.png", shortcut: "/assets/logo.png", apple: "/assets/logo.png" },
-    openGraph: { type: "website", locale: "pt_BR", siteName: "Integrada Neuropsicologia", title: "Integrada Neuropsicologia", description: "Avaliando o presente, transformando o futuro.", images: [{ url: `${origin}/og.png`, alt: "Integrada Neuropsicologia — avaliando o presente, transformando o futuro" }] },
-    twitter: { card: "summary_large_image", title: "Integrada Neuropsicologia", description: "Avaliando o presente, transformando o futuro.", images: [`${origin}/og.png`] },
+    openGraph: { type: "website", locale: "pt_BR", siteName: "Integrada Neuropsicologia", title: "Avaliação Neuropsicológica On-line para Adultos", description: "Entenda o que está por trás das dificuldades de foco, memória e organização.", images: [{ url: `${origin}/og.png`, alt: "Avaliação neuropsicológica on-line para adultos — Integrada Neuropsicologia" }] },
+    twitter: { card: "summary_large_image", title: "Avaliação Neuropsicológica On-line para Adultos", description: "Entenda o que está por trás das dificuldades de foco, memória e organização.", images: [`${origin}/og.png`] },
   };
 }
 
