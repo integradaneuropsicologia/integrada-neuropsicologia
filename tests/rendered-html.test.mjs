@@ -43,7 +43,15 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /O conteúdo do formulário não é armazenado no servidor deste site/i);
   assert.match(html, /href="\/politica-de-privacidade"/i);
   assert.match(html, /analytics_storage:\s*'denied'/i);
+  assert.match(html, /ad_storage:\s*'denied'/i);
+  assert.match(html, /ad_user_data:\s*'denied'/i);
   assert.match(html, /ad_personalization:\s*'denied'/i);
+  assert.match(html, /wait_for_update:\s*500/i);
+  assert.equal((html.match(/data-tracking-event="whatsapp_click"/g) ?? []).length, 7);
+  assert.equal((html.match(/data-tracking-event="phone_click"/g) ?? []).length, 1);
+  assert.equal((html.match(/data-tracking-event="google_reviews_click"/g) ?? []).length, 1);
+  assert.equal((html.match(/data-form-location="hero"/g) ?? []).length, 1);
+  assert.equal((html.match(/data-form-location="contact_section"/g) ?? []).length, 1);
   assert.match(html, /"@type":"LocalBusiness"/);
   assert.match(html, /"@type":"Service"/);
   assert.match(html, /"requiredMinAge":18/);
@@ -53,7 +61,15 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.doesNotMatch(html, /aggregateRating|"@type":"Review"|"@type":"FAQPage"/);
   assert.doesNotMatch(html, /src="\/assets\/hero-family\.avif"/);
   assert.doesNotMatch(html, /Nada fica armazenado neste site/i);
-  assert.doesNotMatch(html, /googletagmanager\.com|google-analytics\.com/i);
+  assert.doesNotMatch(html, /googletagmanager\.com\/gtag\/js|google-analytics\.com/i);
+  const gtmContainerId = process.env.GTM_CONTAINER_ID?.trim().toUpperCase();
+  if (/^GTM-[A-Z0-9]+$/.test(gtmContainerId ?? "")) {
+    assert.equal((html.match(/googletagmanager\.com\/gtm\.js\?id=/g) ?? []).length, 1);
+    assert.equal((html.match(/googletagmanager\.com\/ns\.html\?id=/g) ?? []).length, 1);
+    assert.equal((html.match(new RegExp(gtmContainerId, "g")) ?? []).length, 2);
+  } else {
+    assert.doesNotMatch(html, /googletagmanager\.com/i);
+  }
   assert.doesNotMatch(html, /chatgpt\.site/i);
   assert.doesNotMatch(html, /triagem|Origem:|14\+? anos/i);
   assert.doesNotMatch(html, /\/_vinext\/image/);

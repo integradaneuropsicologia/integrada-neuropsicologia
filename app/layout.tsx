@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import { CookieConsent } from "@/components/CookieConsent";
+import {
+  GoogleConsentDefaults,
+  GoogleTagManagerHead,
+  GoogleTagManagerNoScript,
+  resolveGtmContainerId,
+} from "@/components/GoogleTagManager";
 import { HOME_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import "./globals.css";
+
+const gtmContainerId = resolveGtmContainerId(process.env.GTM_CONTAINER_ID);
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -31,23 +39,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="pt-BR">
       <head>
+        <GoogleConsentDefaults />
+        <GoogleTagManagerHead containerId={gtmContainerId} />
         <link rel="preload" href="/assets/madefor-display.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/assets/fahkwang.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <script dangerouslySetInnerHTML={{ __html: `
-          window.dataLayer = window.dataLayer || [];
-          window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
-          window.gtag('consent', 'default', {
-            analytics_storage: 'denied',
-            ad_storage: 'denied',
-            ad_user_data: 'denied',
-            ad_personalization: 'denied',
-            functionality_storage: 'granted',
-            security_storage: 'granted',
-            wait_for_update: 500
-          });
-        ` }} />
       </head>
-      <body>{children}<CookieConsent /></body>
+      <body><GoogleTagManagerNoScript containerId={gtmContainerId} />{children}<CookieConsent /></body>
     </html>
   );
 }

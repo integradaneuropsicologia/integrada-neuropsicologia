@@ -1,7 +1,11 @@
 "use client";
 
-import { FormEvent, useId, useState } from "react";
-import { canMeasureGenericEvents } from "@/components/CookieConsent";
+import { FormEvent, SyntheticEvent, useId, useState } from "react";
+import { TrackedWhatsAppLink } from "@/components/TrackedLandingLink";
+import {
+  createLeadFormTrackingController,
+  type FormLocation,
+} from "@/lib/data-layer";
 import { whatsappUrl } from "@/lib/site-data";
 
 type OnlineAssessmentLeadFormProps = {
@@ -21,10 +25,24 @@ const interestOptions = [
 
 export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadFormProps) {
   const formId = useId();
+  const formLocation: FormLocation = placement === "hero" ? "hero" : "contact_section";
+  const ctaLocation = placement === "hero" ? "hero" : "contact";
+  const [trackingController] = useState(() => createLeadFormTrackingController(formLocation));
   const [submitted, setSubmitted] = useState(false);
+
+  function handleFieldInteraction(event: SyntheticEvent<HTMLFormElement>) {
+    const element = event.target;
+    if (!(element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement)) return;
+    trackingController.start();
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!event.currentTarget.checkValidity()) {
+      event.currentTarget.reportValidity();
+      return;
+    }
+
     const data = new FormData(event.currentTarget);
     const name = String(data.get("name") ?? "").trim();
     const interest = String(data.get("interest") ?? "").trim();
@@ -37,18 +55,20 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
       "Consentimento: autorizo o tratamento destes dados para preparar esta mensagem e responder ao meu contato pelo WhatsApp.",
     ].filter(Boolean).join("\n");
 
-    if (canMeasureGenericEvents()) {
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ event: "whatsapp_lead_open", form_location: placement });
-    }
+    const whatsappDestination = whatsappUrl(text);
+    const accepted = trackingController.submit(whatsappDestination);
+    if (!accepted) return;
     setSubmitted(true);
-    const opened = window.open(whatsappUrl(text), "_blank");
-    if (opened) opened.opener = null;
-    if (!opened) window.location.href = whatsappUrl(text);
   }
 
   return (
-    <form className={`lp-lead-form lp-lead-form-${placement}`} onSubmit={handleSubmit}>
+    <form
+      className={`lp-lead-form lp-lead-form-${placement}`}
+      data-form-location={formLocation}
+      onFocusCapture={handleFieldInteraction}
+      onInputCapture={handleFieldInteraction}
+      onSubmit={handleSubmit}
+    >
       <div className="lp-form-heading">
         <span>Primeiro contato</span>
         <h2>Conte o que você quer entender.</h2>
@@ -72,10 +92,10 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
         <span>Autorizo, de forma específica, o tratamento do meu nome e das informações de saúde que eu escolher informar, exclusivamente para preparar esta mensagem e responder ao meu contato pelo WhatsApp. Posso revogar esta autorização pelo canal indicado na <a href="/politica-de-privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a>.</span>
       </label>
 
-      <button type="submit" className="lp-primary-button lp-form-submit">Quero conversar sobre a avaliação <span aria-hidden="true">→</span></button>
+      <button type="submit" className="lp-primary-button lp-form-submit" disabled={submitted}>{submitted ? "Abrindo o WhatsApp…" : "Quero conversar sobre a avaliação"} {!submitted && <span aria-hidden="true">→</span>}</button>
       <p className="lp-form-note">Os dados preenchidos apenas preparam a mensagem que você poderá revisar antes de enviá-la pelo WhatsApp. O conteúdo do formulário não é armazenado no servidor deste site. Depois do envio, a conversa será tratada pela Integrada Neuropsicologia e pelo WhatsApp/Meta. Informações de navegação e cookies são tratadas conforme suas preferências e nossa <a href="/politica-de-privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a>. Não envie exames ou documentos neste primeiro contato.</p>
-      <p className="lp-form-alternative">Prefere não informar sua dificuldade aqui? <a href={whatsappUrl("Olá! Gostaria de entender como funciona a avaliação neuropsicológica on-line para adultos.")} target="_blank" rel="noreferrer">Inicie uma conversa no WhatsApp sem preencher o formulário.</a></p>
-      {submitted && <p className="lp-form-status" role="status">Conversa preparada. Se o WhatsApp não abriu, envie novamente.</p>}
+      <p className="lp-form-alternative">Prefere não informar sua dificuldade aqui? <TrackedWhatsAppLink href={whatsappUrl("Olá! Gostaria de entender como funciona a avaliação neuropsicológica on-line para adultos.")} ctaLocation={ctaLocation} target="_blank" rel="noreferrer">Inicie uma conversa no WhatsApp sem preencher o formulário.</TrackedWhatsAppLink></p>
+      {submitted && <p className="lp-form-status" role="status">Conversa preparada. O WhatsApp será aberto nesta mesma aba.</p>}
     </form>
   );
 }

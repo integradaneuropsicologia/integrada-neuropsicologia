@@ -3,6 +3,11 @@ import type { Metadata } from "next";
 import { CookieSettingsButton } from "@/components/CookieConsent";
 import { OnlineAssessmentLeadForm } from "@/components/OnlineAssessmentLeadForm";
 import {
+  TrackedGoogleReviewsLink,
+  TrackedPhoneLink,
+  TrackedWhatsAppLink,
+} from "@/components/TrackedLandingLink";
+import {
   HOME_DESCRIPTION,
   HOME_TITLE,
   LANDING_PATH,
@@ -236,7 +241,7 @@ export default function Home() {
           <a href="#como-funciona">Como funciona</a>
           <a href="#duvidas">Dúvidas</a>
         </nav>
-        <a className="lp-header-cta" href={directContact} target="_blank" rel="noreferrer">Falar com a equipe</a>
+        <TrackedWhatsAppLink className="lp-header-cta" href={directContact} ctaLocation="header" target="_blank" rel="noreferrer">Falar com a equipe</TrackedWhatsAppLink>
       </header>
 
       <main>
@@ -251,7 +256,7 @@ export default function Home() {
               <li><span aria-hidden="true">✓</span> Brasileiros com 18 anos ou mais, no Brasil e no exterior</li>
             </ul>
             <div className="lp-hero-actions">
-              <a className="lp-primary-button" href={directContact} target="_blank" rel="noreferrer">Quero conversar com a equipe <span aria-hidden="true">→</span></a>
+              <TrackedWhatsAppLink className="lp-primary-button" href={directContact} ctaLocation="hero" target="_blank" rel="noreferrer">Quero conversar com a equipe <span aria-hidden="true">→</span></TrackedWhatsAppLink>
               <a className="lp-quiet-link" href="#como-funciona">Entender como funciona <span aria-hidden="true">↓</span></a>
             </div>
             <p className="lp-hero-note">Você não precisa chegar com um diagnóstico pronto. O primeiro passo é entender o que tem acontecido.</p>
@@ -290,7 +295,7 @@ export default function Home() {
           </div>
           <div className="lp-inline-cta">
             <p><strong>Esses sinais podem ocorrer por diferentes motivos e não definem um diagnóstico.</strong> Eles mostram que pode ser útil olhar para o conjunto com mais cuidado.</p>
-            <a className="lp-dark-button" href={whatsappUrl("Olá! Quero conversar sobre dificuldades de foco, memória, organização ou relacionamento e entender melhor a avaliação neuropsicológica on-line.")} target="_blank" rel="noreferrer">Conversar sobre minhas dificuldades <span aria-hidden="true">→</span></a>
+            <TrackedWhatsAppLink className="lp-dark-button" href={whatsappUrl("Olá! Quero conversar sobre dificuldades de foco, memória, organização ou relacionamento e entender melhor a avaliação neuropsicológica on-line.")} ctaLocation="signals" target="_blank" rel="noreferrer">Conversar sobre minhas dificuldades <span aria-hidden="true">→</span></TrackedWhatsAppLink>
           </div>
         </section>
 
@@ -352,12 +357,12 @@ export default function Home() {
             <h2 id="google-reviews-title">Consulte as experiências compartilhadas diretamente no Google.</h2>
             <p>Para preservar a privacidade de quem foi atendido, não reproduzimos relatos individuais neste site. As avaliações podem ser consultadas no perfil oficial da Integrada.</p>
           </div>
-          <a className="lp-google-reviews-card" href={googleReviewsUrl} target="_blank" rel="noreferrer">
+          <TrackedGoogleReviewsLink className="lp-google-reviews-card" href={googleReviewsUrl} target="_blank" rel="noreferrer">
             <span className="lp-google-platform">Google Maps</span>
             <strong>Integrada Neuropsicologia</strong>
             <span>Avaliações publicadas no perfil oficial</span>
             <b>Ver avaliações no Google <i aria-hidden="true">↗</i></b>
-          </a>
+          </TrackedGoogleReviewsLink>
         </section>
 
         <section className="lp-process" id="como-funciona">
@@ -424,18 +429,18 @@ export default function Home() {
 
         <section className="lp-final-cta">
           <div><span>Integrada Neuropsicologia</span><h2>Compreender o que acontece pode mudar a forma como você cuida de si.</h2></div>
-          <a className="lp-light-button" href={directContact} target="_blank" rel="noreferrer">Verificar disponibilidade <span aria-hidden="true">→</span></a>
+          <TrackedWhatsAppLink className="lp-light-button" href={directContact} ctaLocation="final" target="_blank" rel="noreferrer">Verificar disponibilidade <span aria-hidden="true">→</span></TrackedWhatsAppLink>
         </section>
       </main>
 
       <footer className="lp-footer">
         <div className="lp-footer-brand"><img src="/assets/logo.png" alt="" width={38} height={38} loading="lazy" decoding="async" /><span><strong>Integrada Neuropsicologia</strong><small>Avaliando o presente, transformando o futuro.</small></span></div>
-        <div><strong>Atendimento</strong><span>On-line para pessoas com 18 anos ou mais — brasileiros no Brasil e em outros países</span><span>Responsável técnica: Carla Luciana da Conceição Lima • Psicóloga • CRP 08/39739</span><a href="tel:+5541992113665">(41) 99211-3665</a></div>
+        <div><strong>Atendimento</strong><span>On-line para pessoas com 18 anos ou mais — brasileiros no Brasil e em outros países</span><span>Responsável técnica: Carla Luciana da Conceição Lima • Psicóloga • CRP 08/39739</span><TrackedPhoneLink href="tel:+5541992113665">(41) 99211-3665</TrackedPhoneLink></div>
         <div><strong>Endereço profissional</strong><span>Rua Jacarezinho, 1266, Mercês<br />CEP 80810-130 — Curitiba/PR</span><a href="/politica-de-privacidade">Política de Privacidade</a><CookieSettingsButton className="lp-footer-cookie-button" /></div>
         <p>© {new Date().getFullYear()} Integrada Neuropsicologia. O conteúdo deste site é informativo e não substitui avaliação individual.</p>
       </footer>
 
-      <a className="lp-floating-cta" href={directContact} target="_blank" rel="noreferrer">Conversar pelo WhatsApp <span aria-hidden="true">→</span></a>
+      <TrackedWhatsAppLink className="lp-floating-cta" href={directContact} ctaLocation="floating_mobile" target="_blank" rel="noreferrer">Conversar pelo WhatsApp <span aria-hidden="true">→</span></TrackedWhatsAppLink>
     </div>
   );
 }

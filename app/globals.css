@@ -417,6 +417,7 @@ h1,h2 { font-family:"Madefor Display","Madefor",sans-serif; line-height:1.08; le
 .lp-lead-form textarea { min-height:74px; padding-top:12px; resize:vertical; }
 .lp-lead-form input:focus,.lp-lead-form select:focus,.lp-lead-form textarea:focus { border-color:var(--lp-green); box-shadow:0 0 0 3px rgba(10,87,56,.1); }
 .lp-form-submit { width:100%; margin-top:19px; }
+.lp-form-submit:disabled { cursor:wait; opacity:.72; transform:none; }
 .lp-form-note { margin:10px 0 0; color:#5d6b63; text-align:center; font-size:.67rem; line-height:1.45; }
 .lp-form-note a,.lp-form-alternative a { color:var(--lp-green); font-weight:850; text-decoration:underline; text-underline-offset:2px; }
 .lp-lead-form .lp-form-consent { margin:18px 0 0; display:grid; grid-template-columns:20px 1fr; align-items:start; gap:10px; color:#43534a; font-size:.69rem; font-weight:500; line-height:1.48; cursor:pointer; }

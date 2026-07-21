@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { updateGoogleConsent } from "@/lib/data-layer";
 
 const STORAGE_KEY = "integrada-cookie-consent-v1";
 const PREFERENCE_LIFETIME = 1000 * 60 * 60 * 24 * 180;
@@ -13,13 +14,6 @@ type ConsentPreference = {
   decidedAt: string;
   expiresAt: number;
 };
-
-declare global {
-  interface Window {
-    dataLayer: unknown[];
-    gtag?: (...args: unknown[]) => void;
-  }
-}
 
 function removeOptionalCookies(preference: Pick<ConsentPreference, "analytics" | "ads">) {
   const analyticsCookie = /^(?:_ga|_gid|_gat)/;
@@ -40,14 +34,7 @@ function removeOptionalCookies(preference: Pick<ConsentPreference, "analytics" |
 }
 
 function applyConsent(preference: Pick<ConsentPreference, "analytics" | "ads">) {
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || ((...args: unknown[]) => window.dataLayer.push(args));
-  window.gtag("consent", "update", {
-    analytics_storage: preference.analytics ? "granted" : "denied",
-    ad_storage: preference.ads ? "granted" : "denied",
-    ad_user_data: preference.ads ? "granted" : "denied",
-    ad_personalization: "denied",
-  });
+  updateGoogleConsent(preference);
 
   if (!preference.analytics || !preference.ads) removeOptionalCookies(preference);
 }
@@ -66,11 +53,6 @@ function readStoredPreference(): ConsentPreference | null {
   } catch {
     return null;
   }
-}
-
-export function canMeasureGenericEvents() {
-  const preference = readStoredPreference();
-  return Boolean(preference && (preference.analytics || preference.ads));
 }
 
 export function CookieSettingsButton({ className = "" }: { className?: string }) {

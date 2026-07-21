@@ -91,8 +91,8 @@ export default function PrivacyPolicyPage() {
                 <thead><tr><th>Categoria</th><th>Finalidade</th><th>Quando é usada</th></tr></thead>
                 <tbody>
                   <tr><td>Necessários</td><td>Lembrar preferências de privacidade e manter segurança e funcionamento. A hospedagem pode usar o cookie <code>__cf_bm</code> para proteção contra tráfego automatizado e abuso.</td><td>Sempre que necessário para operar e proteger o site. Esses recursos não são desligados pelo painel de preferências.</td></tr>
-                  <tr><td>Medição de audiência</td><td>Entender visitas, páginas e desempenho geral.</td><td>Somente após autorização, quando uma ferramenta de medição estiver ativa.</td></tr>
-                  <tr><td>Publicidade e conversões</td><td>Avaliar a efetividade de campanhas, sem enviar o texto do formulário.</td><td>Somente após autorização, quando uma ferramenta de publicidade estiver ativa.</td></tr>
+                  <tr><td>Medição de audiência</td><td>Entender visitas, páginas e desempenho geral, sem enviar o conteúdo do formulário.</td><td>Cookies e armazenamento analítico somente após autorização. Com a escolha negada, a configuração de consentimento informa esse estado às ferramentas.</td></tr>
+                  <tr><td>Publicidade e conversões</td><td>Avaliar a efetividade de campanhas, sem enviar o texto do formulário.</td><td>Cookies e armazenamento publicitário somente após autorização. Não usamos personalização de anúncios para condições de saúde.</td></tr>
                 </tbody>
               </table>
             </div>
@@ -107,7 +107,7 @@ export default function PrivacyPolicyPage() {
 
           <section>
             <h2>7. Compartilhamento e transferências</h2>
-            <p>Dados podem ser processados por fornecedores necessários à operação, como hospedagem, WhatsApp/Meta e, quando autorizadas e instaladas, ferramentas do Google para medição e publicidade. Esses fornecedores podem operar infraestrutura fora do Brasil e possuem regras próprias de privacidade e segurança. Consulte também <a href="https://policies.google.com/technologies/partner-sites?hl=pt-BR" target="_blank" rel="noreferrer">como o Google usa informações de sites que utilizam seus serviços</a>.</p>
+            <p>Dados podem ser processados por fornecedores necessários à operação, como hospedagem, WhatsApp/Meta e ferramentas do Google para gestão de tags, medição e publicidade, configuradas para respeitar suas preferências de consentimento. Esses fornecedores podem operar infraestrutura fora do Brasil e possuem regras próprias de privacidade e segurança. Consulte também <a href="https://policies.google.com/technologies/partner-sites?hl=pt-BR" target="_blank" rel="noreferrer">como o Google usa informações de sites que utilizam seus serviços</a>.</p>
             <p>Não comercializamos as informações preenchidas no formulário.</p>
           </section>
 
