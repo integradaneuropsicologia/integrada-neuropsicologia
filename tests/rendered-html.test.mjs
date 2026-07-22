@@ -47,6 +47,11 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /ad_user_data:\s*'denied'/i);
   assert.match(html, /ad_personalization:\s*'denied'/i);
   assert.match(html, /wait_for_update:\s*500/i);
+  assert.match(html, /localStorage\.getItem\("integrada-cookie-consent-v1"\)/i);
+  assert.match(html, /storedConsent\.expiresAt\s*>\s*Date\.now\(\)/i);
+  assert.match(html, /analytics_storage:\s*storedConsent\.analytics\s*\?\s*'granted'\s*:\s*'denied'/i);
+  assert.match(html, /ad_storage:\s*storedConsent\.ads\s*\?\s*'granted'\s*:\s*'denied'/i);
+  assert.match(html, /ad_user_data:\s*storedConsent\.ads\s*\?\s*'granted'\s*:\s*'denied'/i);
   assert.equal((html.match(/data-tracking-event="whatsapp_click"/g) ?? []).length, 7);
   assert.equal((html.match(/data-tracking-event="phone_click"/g) ?? []).length, 1);
   assert.equal((html.match(/data-tracking-event="google_reviews_click"/g) ?? []).length, 1);
@@ -64,9 +69,14 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.doesNotMatch(html, /googletagmanager\.com\/gtag\/js|google-analytics\.com/i);
   assert.doesNotMatch(html, /G-KN0F1TETG2|GT-NCN22HRP|gtag\(['"]config['"]/i);
   const consentDefaultsIndex = html.indexOf('data-google-consent-defaults="true"');
+  const consentDefaultCommandIndex = html.indexOf("window.gtag('consent', 'default'");
+  const storedConsentUpdateIndex = html.indexOf("window.gtag('consent', 'update'");
   const gtmHeadIndex = html.indexOf('data-google-tag-manager="head"');
   assert.ok(consentDefaultsIndex >= 0, "Consent Mode defaults should exist");
+  assert.ok(consentDefaultCommandIndex > consentDefaultsIndex, "Consent Mode should deny by default");
+  assert.ok(storedConsentUpdateIndex > consentDefaultCommandIndex, "Stored consent should be restored only after privacy-safe defaults");
   assert.ok(gtmHeadIndex > consentDefaultsIndex, "Consent Mode defaults should precede the GTM loader");
+  assert.ok(gtmHeadIndex > storedConsentUpdateIndex, "Stored consent should be restored before the GTM loader");
   assert.match(html, /<body[^>]*><noscript data-google-tag-manager="body">/i);
   assert.equal((html.match(/data-google-tag-manager="head"/g) ?? []).length, 1);
   assert.equal((html.match(/data-google-tag-manager="body"/g) ?? []).length, 1);

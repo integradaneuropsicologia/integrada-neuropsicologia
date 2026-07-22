@@ -8,13 +8,11 @@ Recebidos e validados por formato:
 
 - Google Tag Manager: `GTM-KHPMDWM9`;
 - GA4 – ID de mensuração: `G-KN0F1TETG2`;
-- Google Tag: `GT-NCN22HRP`.
-
-Ainda pendentes:
-
-- ID real da conta do Google Ads;
-- label da conversão “Formulário para WhatsApp”;
-- label da conversão “WhatsApp direto”.
+- Google Tag do GA4: `GT-NCN22HRP`;
+- Google Ads: `AW-16711609590`;
+- Google Tag do Google Ads: `GT-WF83BXXS`;
+- conversão “Formulário para WhatsApp”: `u7ZRCJK1utQcEPbZ26A-`;
+- conversão “WhatsApp direto”: `w6oWCJW1utQcEPbZ26A-`.
 
 Somente o ID do contêiner entra no código do site. Os demais identificadores ficam nas tags nativas do próprio GTM. Não instalar o snippet manual de `gtag.js`, pois isso duplicaria a arquitetura gerenciada pelo GTM.
 
@@ -40,18 +38,19 @@ Não criar variáveis de formulário, DOM, clique ou URL que capturem nome, inte
 
 ## Configuração do contêiner
 
-1. Criar uma tag nativa **Google Tag** com `GT-NCN22HRP` e acionamento `Initialization – All Pages`; confirmar na conta que ela está associada ao fluxo `G-KN0F1TETG2`.
-2. Criar uma tag nativa **Conversion Linker** com acionamento `All Pages`.
-3. Criar acionadores de evento personalizado, com correspondência exata, para os cinco eventos da tabela acima.
-4. Criar somente estas variáveis de camada de dados: `cta_location`, `form_location`, `contact_method`, `page_type` e `destination`.
-5. Criar os eventos do GA4:
+1. Tag nativa **Google Tag** com `GT-NCN22HRP` e acionamento `Initialization – All Pages`; ela está associada ao fluxo `G-KN0F1TETG2`.
+2. Tag nativa **Google Tag** com `AW-16711609590` e acionamento `Initialization – All Pages`.
+3. Tag nativa **Conversion Linker** com acionamento `All Pages`.
+4. Acionadores de evento personalizado, com correspondência exata, para os cinco eventos da tabela acima.
+5. Somente estas variáveis de camada de dados: `cta_location`, `form_location`, `contact_method`, `page_type` e `destination`.
+6. Eventos do GA4:
    - `whatsapp_click` a partir do evento homônimo;
    - `generate_lead` a partir de `lead_form_submit`;
    - os três eventos secundários com seus nomes originais.
-6. Criar duas tags nativas de conversão do Google Ads:
+7. Duas tags nativas de conversão do Google Ads:
    - formulário para WhatsApp, acionada somente por `lead_form_submit`;
    - WhatsApp direto, acionada somente por `whatsapp_click`.
-7. Confirmar nas configurações de consentimento que GA4 exige `analytics_storage` e as conversões de Ads respeitam `ad_storage` e `ad_user_data`. `ad_personalization` permanece negado.
+8. Nas configurações de consentimento, GA4 exige `analytics_storage` e as conversões de Ads respeitam `ad_storage` e `ad_user_data`. `ad_personalization` permanece negado.
 
 Não importar as duas conversões do GA4 para o Google Ads. A fonte oficial de conversão é a tag direta do Google Ads no GTM.
 

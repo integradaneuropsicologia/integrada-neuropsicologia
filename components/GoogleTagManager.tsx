@@ -1,5 +1,10 @@
 /* eslint-disable @next/next/next-script-for-ga -- The specification requires the official GTM head and noscript snippets, conditionally rendered from a validated real container ID. */
 
+import {
+  COOKIE_CONSENT_STORAGE_KEY,
+  COOKIE_CONSENT_VERSION,
+} from "@/lib/consent-config";
+
 const GTM_CONTAINER_PATTERN = /^GTM-[A-Z0-9]+$/;
 
 export function resolveGtmContainerId(value: string | undefined) {
@@ -8,6 +13,8 @@ export function resolveGtmContainerId(value: string | undefined) {
 }
 
 export function GoogleConsentDefaults() {
+  const storageKey = JSON.stringify(COOKIE_CONSENT_STORAGE_KEY);
+
   return (
     <script
       data-google-consent-defaults="true"
@@ -22,6 +29,26 @@ export function GoogleConsentDefaults() {
             ad_personalization: 'denied',
             wait_for_update: 500
           });
+          try {
+            var storedConsent = JSON.parse(window.localStorage.getItem(${storageKey}) || 'null');
+            if (
+              storedConsent &&
+              storedConsent.version === ${COOKIE_CONSENT_VERSION} &&
+              typeof storedConsent.analytics === 'boolean' &&
+              typeof storedConsent.ads === 'boolean' &&
+              typeof storedConsent.expiresAt === 'number' &&
+              storedConsent.expiresAt > Date.now()
+            ) {
+              window.gtag('consent', 'update', {
+                analytics_storage: storedConsent.analytics ? 'granted' : 'denied',
+                ad_storage: storedConsent.ads ? 'granted' : 'denied',
+                ad_user_data: storedConsent.ads ? 'granted' : 'denied',
+                ad_personalization: 'denied'
+              });
+            }
+          } catch (_) {
+            // Keep the privacy-safe denied defaults when storage is unavailable or invalid.
+          }
         `,
       }}
     />

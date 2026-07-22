@@ -3,9 +3,11 @@
 
 import { useEffect, useId, useState } from "react";
 import { updateGoogleConsent } from "@/lib/data-layer";
-
-const STORAGE_KEY = "integrada-cookie-consent-v1";
-const PREFERENCE_LIFETIME = 1000 * 60 * 60 * 24 * 180;
+import {
+  COOKIE_CONSENT_STORAGE_KEY,
+  COOKIE_CONSENT_VERSION,
+  COOKIE_PREFERENCE_LIFETIME_MS,
+} from "@/lib/consent-config";
 
 type ConsentPreference = {
   version: 1;
@@ -41,12 +43,12 @@ function applyConsent(preference: Pick<ConsentPreference, "analytics" | "ads">) 
 
 function readStoredPreference(): ConsentPreference | null {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
     if (!raw) return null;
     const value = JSON.parse(raw) as Partial<ConsentPreference>;
-    if (value.version !== 1 || typeof value.analytics !== "boolean" || typeof value.ads !== "boolean" || typeof value.expiresAt !== "number") return null;
+    if (value.version !== COOKIE_CONSENT_VERSION || typeof value.analytics !== "boolean" || typeof value.ads !== "boolean" || typeof value.expiresAt !== "number") return null;
     if (value.expiresAt <= Date.now()) {
-      window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.removeItem(COOKIE_CONSENT_STORAGE_KEY);
       return null;
     }
     return value as ConsentPreference;
@@ -102,14 +104,14 @@ export function CookieConsent() {
 
   function savePreference(nextAnalytics: boolean, nextAds: boolean) {
     const preference: ConsentPreference = {
-      version: 1,
+      version: COOKIE_CONSENT_VERSION,
       analytics: nextAnalytics,
       ads: nextAds,
       decidedAt: new Date().toISOString(),
-      expiresAt: Date.now() + PREFERENCE_LIFETIME,
+      expiresAt: Date.now() + COOKIE_PREFERENCE_LIFETIME_MS,
     };
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preference));
+      window.localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, JSON.stringify(preference));
     } catch {
       // The choice still applies to the current page when browser storage is unavailable.
     }
