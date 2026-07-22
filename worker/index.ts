@@ -25,8 +25,10 @@ const LANDING_PATH = "/avaliacao-neuropsicologica-online-adultos";
 const isSitesPath = (pathname: string) =>
   pathname === LANDING_PATH ||
   pathname === `${LANDING_PATH}/` ||
+  pathname === `${LANDING_PATH}.rsc` ||
   pathname === "/politica-de-privacidade" ||
   pathname === "/politica-de-privacidade/" ||
+  pathname === "/politica-de-privacidade.rsc" ||
   pathname === "/robots.txt" ||
   pathname === "/sitemap.xml" ||
   pathname === "/og.png" ||

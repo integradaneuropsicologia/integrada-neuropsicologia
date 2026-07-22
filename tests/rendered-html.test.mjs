@@ -148,8 +148,18 @@ test("routes only the custom apex landing and privacy pages to Sites", async () 
   const landingResponse = await render(`${landingPath}?utm_source=google`, apex);
   assert.equal(landingResponse.status, 200);
 
+  const landingRscResponse = await render(`${landingPath}.rsc`, apex);
+  assert.equal(landingRscResponse.status, 200);
+  assert.equal(landingRscResponse.headers.get("location"), null);
+  assert.match(landingRscResponse.headers.get("content-type") ?? "", /^text\/x-component\b/i);
+
   const privacyResponse = await render("/politica-de-privacidade", apex);
   assert.equal(privacyResponse.status, 200);
+
+  const privacyRscResponse = await render("/politica-de-privacidade.rsc", apex);
+  assert.equal(privacyRscResponse.status, 200);
+  assert.equal(privacyRscResponse.headers.get("location"), null);
+  assert.match(privacyRscResponse.headers.get("content-type") ?? "", /^text\/x-component\b/i);
 
   const assetResponse = await render("/assets/logo.png", apex);
   assert.equal(assetResponse.headers.get("location"), null);
