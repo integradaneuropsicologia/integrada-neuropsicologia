@@ -39,7 +39,7 @@ Não criar variáveis de formulário, DOM, clique ou URL que capturem nome, inte
 ## Configuração do contêiner
 
 1. Tag nativa **Google Tag** com `GT-NCN22HRP` e acionamento `Initialization – All Pages`; ela está associada ao fluxo `G-KN0F1TETG2`.
-2. Tag nativa **Google Tag** com `AW-16711609590` e acionamento `Initialization – All Pages`.
+2. Tag nativa **Google Tag** com `AW-16711609590`, acionamento `Initialization – All Pages` e parâmetro de configuração `send_page_view = false`. A conta do Ads também está ligada ao fluxo do site Wix; esse parâmetro mantém a tag base e a atribuição do Ads sem enviar uma segunda visualização da landing ao fluxo `G-B608CFXF76`.
 3. Tag nativa **Conversion Linker** com acionamento `All Pages`.
 4. Acionadores de evento personalizado, com correspondência exata, para os cinco eventos da tabela acima.
 5. Somente estas variáveis de camada de dados: `cta_location`, `form_location`, `contact_method`, `page_type` e `destination`.
@@ -65,7 +65,8 @@ Não importar as duas conversões do GA4 para o Google Ads. A fonte oficial de c
 
 Antes de publicar o site com o ID real, usar o Preview do GTM e o DebugView do GA4 para confirmar:
 
-- um único carregamento do GTM, Google Tag e Conversion Linker;
+- um único carregamento do GTM, de cada Google Tag e do Conversion Linker;
+- `page_view` da landing enviado somente ao fluxo `G-KN0F1TETG2`, sem cópia para `G-B608CFXF76`;
 - nenhuma conversão no carregamento da página;
 - `lead_form_start` apenas uma vez em cada formulário;
 - envio inválido sem `lead_form_submit`;
