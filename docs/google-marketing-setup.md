@@ -1,18 +1,22 @@
 # Google Tag Manager, GA4 e Google Ads
 
-Este projeto contém a `dataLayer`, os eventos sanitizados e o Consent Mode v2. A página só inclui o contêiner quando a variável de build `GTM_CONTAINER_ID` contém um ID real e válido. Sem essa variável, nenhum endereço do Google Tag Manager é renderizado.
+Este projeto contém a `dataLayer`, os eventos sanitizados, o Consent Mode v2 e o contêiner real do Google Tag Manager instalado em todas as páginas. O GA4 e o Google Ads não são carregados diretamente pelo código do site: suas tags devem ser configuradas dentro do GTM.
 
-## Identificadores pendentes
+## Identificadores
 
-Copiar das contas, sem criar valores de teste:
+Recebidos e validados por formato:
 
-- ID real do contêiner do Google Tag Manager;
-- ID de mensuração do GA4 ou ID real do Google Tag;
+- Google Tag Manager: `GTM-KHPMDWM9`;
+- GA4 – ID de mensuração: `G-KN0F1TETG2`;
+- Google Tag: `GT-NCN22HRP`.
+
+Ainda pendentes:
+
 - ID real da conta do Google Ads;
 - label da conversão “Formulário para WhatsApp”;
 - label da conversão “WhatsApp direto”.
 
-Somente o ID do contêiner entra no ambiente de build do site. Os demais identificadores ficam nas tags nativas do próprio GTM.
+Somente o ID do contêiner entra no código do site. Os demais identificadores ficam nas tags nativas do próprio GTM. Não instalar o snippet manual de `gtag.js`, pois isso duplicaria a arquitetura gerenciada pelo GTM.
 
 ## Contrato da página
 
@@ -36,7 +40,7 @@ Não criar variáveis de formulário, DOM, clique ou URL que capturem nome, inte
 
 ## Configuração do contêiner
 
-1. Criar uma tag nativa **Google Tag** com o ID real do GA4/Google Tag e acionamento `Initialization – All Pages`.
+1. Criar uma tag nativa **Google Tag** com `GT-NCN22HRP` e acionamento `Initialization – All Pages`; confirmar na conta que ela está associada ao fluxo `G-KN0F1TETG2`.
 2. Criar uma tag nativa **Conversion Linker** com acionamento `All Pages`.
 3. Criar acionadores de evento personalizado, com correspondência exata, para os cinco eventos da tabela acima.
 4. Criar somente estas variáveis de camada de dados: `cta_location`, `form_location`, `contact_method`, `page_type` e `destination`.
@@ -72,4 +76,4 @@ Antes de publicar o site com o ID real, usar o Preview do GTM e o DebugView do G
 - consentimento negado e concedido em sessões separadas;
 - fluxo completo em Android, iPhone/Safari e computador.
 
-Depois do Preview, criar e publicar uma versão nomeada do contêiner. Só então gerar a build com `GTM_CONTAINER_ID` e publicar a landing page.
+Depois do Preview, criar e publicar uma versão nomeada do contêiner. Só então publicar esta versão instrumentada da landing page.

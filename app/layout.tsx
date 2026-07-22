@@ -6,10 +6,11 @@ import {
   GoogleTagManagerNoScript,
   resolveGtmContainerId,
 } from "@/components/GoogleTagManager";
+import { GTM_CONTAINER_ID } from "@/lib/google-tag-config";
 import { HOME_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
-const gtmContainerId = resolveGtmContainerId(process.env.GTM_CONTAINER_ID);
+const gtmContainerId = resolveGtmContainerId(GTM_CONTAINER_ID);
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

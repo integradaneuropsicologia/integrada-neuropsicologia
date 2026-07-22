@@ -62,14 +62,20 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.doesNotMatch(html, /src="\/assets\/hero-family\.avif"/);
   assert.doesNotMatch(html, /Nada fica armazenado neste site/i);
   assert.doesNotMatch(html, /googletagmanager\.com\/gtag\/js|google-analytics\.com/i);
-  const gtmContainerId = process.env.GTM_CONTAINER_ID?.trim().toUpperCase();
-  if (/^GTM-[A-Z0-9]+$/.test(gtmContainerId ?? "")) {
-    assert.equal((html.match(/googletagmanager\.com\/gtm\.js\?id=/g) ?? []).length, 1);
-    assert.equal((html.match(/googletagmanager\.com\/ns\.html\?id=/g) ?? []).length, 1);
-    assert.equal((html.match(new RegExp(gtmContainerId, "g")) ?? []).length, 2);
-  } else {
-    assert.doesNotMatch(html, /googletagmanager\.com/i);
-  }
+  assert.doesNotMatch(html, /G-KN0F1TETG2|GT-NCN22HRP|gtag\(['"]config['"]/i);
+  const consentDefaultsIndex = html.indexOf('data-google-consent-defaults="true"');
+  const gtmHeadIndex = html.indexOf('data-google-tag-manager="head"');
+  assert.ok(consentDefaultsIndex >= 0, "Consent Mode defaults should exist");
+  assert.ok(gtmHeadIndex > consentDefaultsIndex, "Consent Mode defaults should precede the GTM loader");
+  assert.match(html, /<body[^>]*><noscript data-google-tag-manager="body">/i);
+  assert.equal((html.match(/data-google-tag-manager="head"/g) ?? []).length, 1);
+  assert.equal((html.match(/data-google-tag-manager="body"/g) ?? []).length, 1);
+  const gtmHeadMarkup = html.match(/<script data-google-tag-manager="head">[\s\S]*?<\/script>/i)?.[0] ?? "";
+  const gtmBodyMarkup = html.match(/<noscript data-google-tag-manager="body">[\s\S]*?<\/noscript>/i)?.[0] ?? "";
+  assert.equal((gtmHeadMarkup.match(/googletagmanager\.com\/gtm\.js\?id=/g) ?? []).length, 1);
+  assert.equal((gtmBodyMarkup.match(/googletagmanager\.com\/ns\.html\?id=/g) ?? []).length, 1);
+  assert.equal((gtmHeadMarkup.match(/GTM-KHPMDWM9/g) ?? []).length, 1);
+  assert.equal((gtmBodyMarkup.match(/GTM-KHPMDWM9/g) ?? []).length, 1);
   assert.doesNotMatch(html, /chatgpt\.site/i);
   assert.doesNotMatch(html, /triagem|Origem:|14\+? anos/i);
   assert.doesNotMatch(html, /\/_vinext\/image/);
