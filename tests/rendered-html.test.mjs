@@ -105,9 +105,39 @@ test("publishes crawl directives and a canonical XML sitemap", async () => {
   assert.match(sitemapResponse.headers.get("content-type") ?? "", /xml/i);
   const sitemap = await sitemapResponse.text();
   assert.match(sitemap, /https:\/\/integradaneuropsicologia\.com\.br\/avaliacao-neuropsicologica-online-adultos<\/loc>/i);
+  assert.match(sitemap, /\/avaliacao-neuropsicologica-online-adultos\/como-funciona<\/loc>/i);
+  assert.match(sitemap, /\/avaliacao-neuropsicologica-online-adultos\/para-quem<\/loc>/i);
+  assert.match(sitemap, /\/avaliacao-neuropsicologica-online-adultos\/o-que-investiga<\/loc>/i);
+  assert.match(sitemap, /\/avaliacao-neuropsicologica-online-adultos\/duvidas<\/loc>/i);
+  assert.match(sitemap, /\/avaliacao-neuropsicologica-online-adultos\/avaliacoes<\/loc>/i);
+  assert.match(sitemap, /\/avaliacao-neuropsicologica-online-adultos\/contato<\/loc>/i);
   assert.match(sitemap, /\/politica-de-privacidade<\/loc>/i);
   assert.doesNotMatch(sitemap, /\/avaliacaotdah<\/loc>|\/post\/|\/jogosdeestimula/i);
-  assert.equal((sitemap.match(/<url>/g) ?? []).length, 2);
+  assert.equal((sitemap.match(/<url>/g) ?? []).length, 8);
+});
+
+test("server-renders distinct landing destinations for Google Ads sitelinks", async () => {
+  const destinations = [
+    ["como-funciona", /Como funciona a .* on-line/i],
+    ["para-quem", /Para quem .* on-line/i],
+    ["o-que-investiga", /O que a .* pode investigar/i],
+    ["duvidas", /Todo o processo acontece on-line/i],
+    ["avaliacoes", /publicadas no Google/i],
+    ["contato", /Converse com a equipe sobre a/i],
+  ];
+
+  for (const [slug, expectedHeading] of destinations) {
+    const response = await render(`${landingPath}/${slug}`, "integradaneuropsicologia.com.br");
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("location"), null);
+    const html = await response.text();
+    assert.match(html, expectedHeading);
+    assert.match(
+      html,
+      new RegExp(`<link rel="canonical" href="https:\\/\\/integradaneuropsicologia\\.com\\.br${landingPath}\\/${slug}"`, "i"),
+    );
+    assert.match(html, /data-tracking-event="whatsapp_click"/i);
+  }
 });
 
 test("publishes a complete privacy policy for form and cookie data", async () => {
@@ -160,6 +190,15 @@ test("routes only the custom apex landing and privacy pages to Sites", async () 
   assert.equal(privacyRscResponse.status, 200);
   assert.equal(privacyRscResponse.headers.get("location"), null);
   assert.match(privacyRscResponse.headers.get("content-type") ?? "", /^text\/x-component\b/i);
+
+  const sitelinkResponse = await render(`${landingPath}/como-funciona`, apex);
+  assert.equal(sitelinkResponse.status, 200);
+  assert.equal(sitelinkResponse.headers.get("location"), null);
+
+  const sitelinkRscResponse = await render(`${landingPath}/como-funciona.rsc`, apex);
+  assert.equal(sitelinkRscResponse.status, 200);
+  assert.equal(sitelinkRscResponse.headers.get("location"), null);
+  assert.match(sitelinkRscResponse.headers.get("content-type") ?? "", /^text\/x-component\b/i);
 
   const assetResponse = await render("/assets/logo.png", apex);
   assert.equal(assetResponse.headers.get("location"), null);

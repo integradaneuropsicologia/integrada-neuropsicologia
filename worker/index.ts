@@ -21,14 +21,26 @@ interface ExecutionContext {
 const APEX_HOST = "integradaneuropsicologia.com.br";
 const WIX_SITE_URL = "https://www.integradaneuropsicologia.com.br";
 const LANDING_PATH = "/avaliacao-neuropsicologica-online-adultos";
+const SITES_PAGE_PATHS = new Set([
+  LANDING_PATH,
+  `${LANDING_PATH}/como-funciona`,
+  `${LANDING_PATH}/para-quem`,
+  `${LANDING_PATH}/o-que-investiga`,
+  `${LANDING_PATH}/duvidas`,
+  `${LANDING_PATH}/avaliacoes`,
+  `${LANDING_PATH}/contato`,
+  "/politica-de-privacidade",
+]);
+
+const normalizeSitesPagePath = (pathname: string) => {
+  const withoutRsc = pathname.endsWith(".rsc") ? pathname.slice(0, -4) : pathname;
+  return withoutRsc.length > 1 && withoutRsc.endsWith("/")
+    ? withoutRsc.slice(0, -1)
+    : withoutRsc;
+};
 
 const isSitesPath = (pathname: string) =>
-  pathname === LANDING_PATH ||
-  pathname === `${LANDING_PATH}/` ||
-  pathname === `${LANDING_PATH}.rsc` ||
-  pathname === "/politica-de-privacidade" ||
-  pathname === "/politica-de-privacidade/" ||
-  pathname === "/politica-de-privacidade.rsc" ||
+  SITES_PAGE_PATHS.has(normalizeSitesPagePath(pathname)) ||
   pathname === "/robots.txt" ||
   pathname === "/sitemap.xml" ||
   pathname === "/og.png" ||
