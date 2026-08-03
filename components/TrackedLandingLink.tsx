@@ -1,7 +1,8 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import {
+  appendGoogleAdsClickReference,
   type CtaLocation,
   trackGoogleReviewsClick,
   trackPhoneClick,
@@ -20,12 +21,17 @@ export function TrackedWhatsAppLink({
   ctaLocation,
   ...props
 }: LinkProps & { ctaLocation: CtaLocation }) {
+  function handleClick(event: MouseEvent<HTMLAnchorElement>) {
+    trackWhatsAppClick(ctaLocation);
+    event.currentTarget.href = appendGoogleAdsClickReference(props.href);
+  }
+
   return (
     <a
       {...props}
       data-tracking-event="whatsapp_click"
       data-cta-location={ctaLocation}
-      onClick={() => trackWhatsAppClick(ctaLocation)}
+      onClick={handleClick}
     />
   );
 }

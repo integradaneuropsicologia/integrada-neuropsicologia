@@ -39,6 +39,8 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /Carla Luciana da Conceição Lima/);
   assert.match(html, /CRP 08\/39739/);
   assert.match(html, /src="\/assets\/hero-online\.webp"/);
+  assert.match(html, /rel="preload"[^>]+href="\/assets\/hero-online\.webp"/i);
+  assert.match(html, /src="\/assets\/hero-online\.webp"[^>]+loading="eager"[^>]+fetchPriority="high"/i);
   assert.match(html, /Autorizo, de forma específica, o tratamento do meu nome/i);
   assert.match(html, /O conteúdo do formulário não é armazenado no servidor deste site/i);
   assert.match(html, /href="\/politica-de-privacidade"/i);
@@ -177,6 +179,7 @@ test("routes only the custom apex landing and privacy pages to Sites", async () 
 
   const landingResponse = await render(`${landingPath}?utm_source=google`, apex);
   assert.equal(landingResponse.status, 200);
+  assert.match(landingResponse.headers.get("cache-control") ?? "", /s-maxage=86400/i);
 
   const landingRscResponse = await render(`${landingPath}.rsc`, apex);
   assert.equal(landingRscResponse.status, 200);

@@ -1,5 +1,10 @@
 export const LANDING_PAGE_TYPE = "landing_neuro_online" as const;
 
+const ADS_CONSENT_STORAGE_KEY = "integrada-cookie-consent-v1";
+const ADS_CONSENT_VERSION = 1;
+const GOOGLE_AD_CLICK_ID_KEYS = ["gclid", "gbraid", "wbraid"] as const;
+const GOOGLE_AD_CLICK_ID_PATTERN = /^[A-Za-z0-9._~-]{6,512}$/;
+
 export type CtaLocation =
   | "header"
   | "hero"
@@ -186,6 +191,55 @@ export function trackGoogleReviewsClick() {
     destination: "google_maps",
     page_type: LANDING_PAGE_TYPE,
   });
+}
+
+function hasAdsMeasurementConsent() {
+  try {
+    const raw = window.localStorage?.getItem(ADS_CONSENT_STORAGE_KEY);
+    if (!raw) return false;
+    const consent = JSON.parse(raw) as {
+      version?: number;
+      ads?: boolean;
+      expiresAt?: number;
+    };
+    return consent.version === ADS_CONSENT_VERSION && consent.ads === true &&
+      typeof consent.expiresAt === "number" && consent.expiresAt > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Adds only the Google Ads click identifier to the WhatsApp draft when the
+ * visitor has granted advertising consent. The identifier never enters the
+ * dataLayer and no name, health information or message content is sent to
+ * Google. It lets the team later import a qualified-lead conversion using the
+ * WhatsApp message timestamp.
+ */
+export function appendGoogleAdsClickReference(whatsappDestination: string) {
+  if (typeof window === "undefined" || !hasAdsMeasurementConsent()) return whatsappDestination;
+
+  try {
+    const currentHref = typeof window.location?.href === "string" ? window.location.href : "";
+    if (!currentHref) return whatsappDestination;
+
+    const currentUrl = new URL(currentHref);
+    const matchedKey = GOOGLE_AD_CLICK_ID_KEYS.find((key) => currentUrl.searchParams.has(key));
+    if (!matchedKey) return whatsappDestination;
+
+    const clickId = currentUrl.searchParams.get(matchedKey)?.trim() ?? "";
+    if (!GOOGLE_AD_CLICK_ID_PATTERN.test(clickId)) return whatsappDestination;
+
+    const destination = new URL(whatsappDestination);
+    const currentText = destination.searchParams.get("text") ?? "";
+    const reference = "Referência do anúncio: " + matchedKey.toUpperCase() + "=" + clickId;
+    if (currentText.includes(reference)) return whatsappDestination;
+
+    destination.searchParams.set("text", [currentText, reference].filter(Boolean).join("\n"));
+    return destination.toString();
+  } catch {
+    return whatsappDestination;
+  }
 }
 
 function trackAndOpenWhatsApp(

@@ -32,6 +32,8 @@ const SITES_PAGE_PATHS = new Set([
   "/politica-de-privacidade",
 ]);
 
+const HTML_CACHE_CONTROL = "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800";
+
 const normalizeSitesPagePath = (pathname: string) => {
   const withoutRsc = pathname.endsWith(".rsc") ? pathname.slice(0, -4) : pathname;
   return withoutRsc.length > 1 && withoutRsc.endsWith("/")
@@ -49,6 +51,21 @@ const isSitesPath = (pathname: string) =>
   pathname.startsWith("/cdn-cgi/") ||
   pathname.startsWith("/_next/") ||
   pathname.startsWith("/_vinext/");
+
+const isCacheableHtmlRequest = (request: Request, pathname: string) =>
+  request.method === "GET" &&
+  request.headers.get("accept")?.includes("text/html") === true &&
+  SITES_PAGE_PATHS.has(normalizeSitesPagePath(pathname));
+
+const cacheableResponse = (response: Response) => {
+  const result = new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+  result.headers.set("Cache-Control", HTML_CACHE_CONTROL);
+  return result;
+};
 
 // Image security config. SVG sources with .svg extension auto-skip the
 // optimization endpoint on the client side (served directly, no proxy).
@@ -76,6 +93,25 @@ const worker = {
           return result.response();
         },
       }, allowedWidths);
+    }
+
+    if (isCacheableHtmlRequest(request, url.pathname)) {
+      const cacheUrl = new URL(request.url);
+      cacheUrl.search = "";
+      const cacheKey = new Request(cacheUrl.toString(), {
+        method: "GET",
+        headers: { accept: "text/html" },
+      });
+      const edgeCache = (globalThis.caches as (CacheStorage & { default?: Cache }) | undefined)?.default;
+      const cached = await edgeCache?.match(cacheKey);
+      if (cached) return cached;
+
+      const response = await handler.fetch(request, env, ctx);
+      if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) return response;
+
+      const result = cacheableResponse(response);
+      if (edgeCache) ctx.waitUntil(edgeCache.put(cacheKey, result.clone()));
+      return result;
     }
 
     return handler.fetch(request, env, ctx);

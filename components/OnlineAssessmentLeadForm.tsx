@@ -3,6 +3,7 @@
 import { FormEvent, SyntheticEvent, useId, useState } from "react";
 import { TrackedWhatsAppLink } from "@/components/TrackedLandingLink";
 import {
+  appendGoogleAdsClickReference,
   createLeadFormTrackingController,
   type FormLocation,
 } from "@/lib/data-layer";
@@ -55,7 +56,7 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
       "Consentimento: autorizo o tratamento destes dados para preparar esta mensagem e responder ao meu contato pelo WhatsApp.",
     ].filter(Boolean).join("\n");
 
-    const whatsappDestination = whatsappUrl(text);
+    const whatsappDestination = appendGoogleAdsClickReference(whatsappUrl(text));
     const accepted = trackingController.submit(whatsappDestination);
     if (!accepted) return;
     setSubmitted(true);
