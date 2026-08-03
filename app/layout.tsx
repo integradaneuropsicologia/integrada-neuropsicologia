@@ -42,8 +42,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <GoogleConsentDefaults />
         <GoogleTagManagerHead containerId={gtmContainerId} />
-        <link rel="preload" href="/assets/madefor-display.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/assets/fahkwang.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body><GoogleTagManagerNoScript containerId={gtmContainerId} />{children}<CookieConsent /></body>
     </html>

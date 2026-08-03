@@ -384,8 +384,8 @@ h1,h2 { font-family:"Madefor Display","Madefor",sans-serif; line-height:1.08; le
 .lp-hero-copy { position:relative; z-index:1; }
 .lp-kicker { width:max-content; max-width:100%; margin-bottom:24px; display:flex; align-items:center; gap:9px; border:1px solid rgba(255,255,255,.18); border-radius:999px; padding:8px 13px; color:#bfe8d0; font-size:.72rem; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
 .lp-kicker i { width:8px; height:8px; border-radius:50%; background:var(--lp-bright); box-shadow:0 0 0 5px rgba(53,212,127,.13); }
-.lp-hero h1 { max-width:750px; margin-bottom:25px; font-size:clamp(3.25rem,5.4vw,5.75rem); letter-spacing:-.055em; }
-.lp-hero h1 em { color:#72e6a5; font-family:"Fahkwang","Madefor Display",sans-serif; font-style:normal; }
+.lp-hero h1 { max-width:750px; margin-bottom:25px; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; font-size:clamp(3.25rem,5.4vw,5.75rem); letter-spacing:-.055em; }
+.lp-hero h1 em { color:#72e6a5; font-family:inherit; font-style:normal; }
 .lp-hero-lede { max-width:690px; margin-bottom:28px; color:#d3ddd7; font-size:clamp(1.02rem,1.4vw,1.17rem); line-height:1.7; }
 .lp-hero-points { margin:0 0 30px; padding:0; display:grid; gap:10px; list-style:none; color:#eef5f1; font-size:.9rem; }
 .lp-hero-points li { display:flex; align-items:center; gap:10px; }
