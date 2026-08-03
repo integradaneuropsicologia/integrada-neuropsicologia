@@ -96,22 +96,10 @@ const worker = {
     }
 
     if (isCacheableHtmlRequest(request, url.pathname)) {
-      const cacheUrl = new URL(request.url);
-      cacheUrl.search = "";
-      const cacheKey = new Request(cacheUrl.toString(), {
-        method: "GET",
-        headers: { accept: "text/html" },
-      });
-      const edgeCache = (globalThis.caches as (CacheStorage & { default?: Cache }) | undefined)?.default;
-      const cached = await edgeCache?.match(cacheKey);
-      if (cached) return cached;
-
       const response = await handler.fetch(request, env, ctx);
       if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) return response;
 
-      const result = cacheableResponse(response);
-      if (edgeCache) ctx.waitUntil(edgeCache.put(cacheKey, result.clone()));
-      return result;
+      return cacheableResponse(response);
     }
 
     return handler.fetch(request, env, ctx);
