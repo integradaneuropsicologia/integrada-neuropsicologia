@@ -42,8 +42,9 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /src="\/assets\/hero-online\.webp"/);
   const heroPreloads = (html.match(/<link\b[^>]*rel="preload"[^>]*>/gi) ?? [])
     .filter((tag) => /href="\/assets\/hero-online\.webp"/i.test(tag));
-  assert.equal(heroPreloads.length, 1, "the hero image should have exactly one preload");
-  assert.match(html, /src="\/assets\/hero-online\.webp"[^>]+loading="eager"[^>]+fetchPriority="high"/i);
+  assert.equal(heroPreloads.length, 0, "the below-fold mobile hero image should not compete with critical text");
+  assert.match(html, /src="\/assets\/hero-online\.webp"[^>]+loading="lazy"[^>]+decoding="async"/i);
+  assert.doesNotMatch(html, /src="\/assets\/hero-online\.webp"[^>]+fetchPriority="high"/i);
   assert.match(html, /Autorizo, de forma específica, o tratamento do meu nome/i);
   assert.match(html, /O conteúdo do formulário não é armazenado no servidor deste site/i);
   assert.match(html, /uma referência técnica do clique pode ser incluída no rascunho para medir leads qualificados/i);
@@ -56,6 +57,7 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /wait_for_update:\s*500/i);
   assert.match(html, /localStorage\.getItem\("integrada-cookie-consent-v1"\)/i);
   assert.match(html, /storedConsent\.expiresAt\s*>\s*Date\.now\(\)/i);
+  assert.match(html, /data-integrada-cookie-consent['"],\s*['"]stored/i);
   assert.match(html, /analytics_storage:\s*storedConsent\.analytics\s*\?\s*'granted'\s*:\s*'denied'/i);
   assert.match(html, /ad_storage:\s*storedConsent\.ads\s*\?\s*'granted'\s*:\s*'denied'/i);
   assert.match(html, /ad_user_data:\s*storedConsent\.ads\s*\?\s*'granted'\s*:\s*'denied'/i);
@@ -87,6 +89,7 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /<body[^>]*><noscript data-google-tag-manager="body">/i);
   assert.equal((html.match(/data-google-tag-manager="head"/g) ?? []).length, 1);
   assert.equal((html.match(/data-google-tag-manager="body"/g) ?? []).length, 1);
+  assert.match(html, /Você escolhe como a navegação pode ser medida/i);
   const gtmHeadMarkup = html.match(/<script data-google-tag-manager="head">[\s\S]*?<\/script>/i)?.[0] ?? "";
   const gtmBodyMarkup = html.match(/<noscript data-google-tag-manager="body">[\s\S]*?<\/noscript>/i)?.[0] ?? "";
   assert.equal((gtmHeadMarkup.match(/googletagmanager\.com\/gtm\.js\?id=/g) ?? []).length, 1);

@@ -602,6 +602,10 @@ h1,h2 { font-family:"Madefor Display","Madefor",sans-serif; line-height:1.08; le
 .cookie-button-primary { background:#075f32; color:#fff; }
 .cookie-button-outline,.cookie-button-quiet { background:#fff; color:#17432e; }
 .cookie-button:hover { box-shadow:0 7px 18px rgba(7,95,50,.14); }
+html[data-integrada-cookie-consent="stored"] .cookie-consent { display:none; }
+
+.lp-page,.cookie-consent { --lp-system-font:system-ui,-apple-system,"Segoe UI",sans-serif; font-family:var(--lp-system-font); }
+.lp-page h1,.lp-page h2,.lp-page .lp-brand strong,.lp-page .lp-image-badge strong,.lp-page .lp-proof strong,.lp-page .lp-clarity-quote strong,.lp-page .lp-professional-mark,.lp-page .lp-google-reviews-card strong,.lp-page .lp-faq-list summary,.lp-page .lp-faq-list summary span,.lp-page .lp-footer-brand strong,.lp-page .lp-sitelink-hero>aside>strong,.lp-page .lp-sitelink-grid-faq summary,.lp-page .lp-sitelink-review-link>strong,.cookie-consent h2 { font-family:var(--lp-system-font); }
 
 .privacy-page { min-height:100vh; background:#f7f5ee; color:#102219; }
 .privacy-header { position:static; }

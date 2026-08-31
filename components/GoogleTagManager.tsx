@@ -39,6 +39,7 @@ export function GoogleConsentDefaults() {
               typeof storedConsent.expiresAt === 'number' &&
               storedConsent.expiresAt > Date.now()
             ) {
+              document.documentElement.setAttribute('data-integrada-cookie-consent', 'stored');
               window.gtag('consent', 'update', {
                 analytics_storage: storedConsent.analytics ? 'granted' : 'denied',
                 ad_storage: storedConsent.ads ? 'granted' : 'denied',

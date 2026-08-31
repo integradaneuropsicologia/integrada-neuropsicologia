@@ -72,7 +72,7 @@ export function CookieSettingsButton({ className = "" }: { className?: string })
 export function CookieConsent() {
   const analyticsId = useId();
   const adsId = useId();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [customizing, setCustomizing] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [ads, setAds] = useState(false);
@@ -90,6 +90,7 @@ export function CookieConsent() {
 
     const openPreferences = () => {
       const current = readStoredPreference();
+      document.documentElement.removeAttribute("data-integrada-cookie-consent");
       setAnalytics(current?.analytics ?? false);
       setAds(current?.ads ?? false);
       setCustomizing(true);
@@ -115,6 +116,7 @@ export function CookieConsent() {
     } catch {
       // The choice still applies to the current page when browser storage is unavailable.
     }
+    document.documentElement.setAttribute("data-integrada-cookie-consent", "stored");
     applyConsent(preference);
     setAnalytics(nextAnalytics);
     setAds(nextAds);

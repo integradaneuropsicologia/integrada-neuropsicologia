@@ -264,7 +264,7 @@ export default function Home() {
 
           <div className="lp-hero-panel">
             <div className="lp-hero-image">
-              <img src="/assets/hero-online.webp" alt="Pessoa adulta participando de avaliação neuropsicológica on-line em ambiente privativo" width={1200} height={630} loading="eager" decoding="async" fetchPriority="high" />
+              <img src="/assets/hero-online.webp" alt="Pessoa adulta participando de avaliação neuropsicológica on-line em ambiente privativo" width={1200} height={630} loading="lazy" decoding="async" />
               <div className="lp-image-badge"><strong>Mais de 15 anos</strong><span>de experiência clínica</span></div>
             </div>
             <OnlineAssessmentLeadForm placement="hero" />
