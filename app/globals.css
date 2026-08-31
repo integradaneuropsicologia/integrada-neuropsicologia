@@ -583,7 +583,7 @@ h1,h2 { font-family:"Madefor Display","Madefor",sans-serif; line-height:1.08; le
 .lp-sitelink-footer { margin-top:0; }
 
 @supports (content-visibility:auto) {
-  .lp-signals,.lp-topics,.lp-clarity,.lp-professional,.lp-google-reviews,.lp-contact,.lp-faq,.lp-sitelink-content,.lp-final-cta { content-visibility:auto; contain-intrinsic-size:auto 720px; }
+  .lp-signals,.lp-topics,.lp-clarity,.lp-professional,.lp-google-reviews,.lp-process,.lp-contact,.lp-faq,.lp-sitelink-content,.lp-final-cta { content-visibility:auto; contain-intrinsic-size:auto 720px; }
 }
 
 .cookie-consent { position:fixed; z-index:120; right:18px; bottom:18px; left:18px; width:min(1120px,calc(100% - 36px)); margin:auto; padding:22px; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:22px 34px; border:1px solid #c9d8cf; border-radius:20px; background:#fff; color:#102219; box-shadow:0 24px 70px rgba(4,25,16,.24); }

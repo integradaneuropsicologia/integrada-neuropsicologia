@@ -140,7 +140,7 @@ export function CookieConsent() {
           </label>
           <label htmlFor={adsId}>
             <input id={adsId} type="checkbox" checked={ads} onChange={(event) => setAds(event.target.checked)} />
-            <span><strong>Publicidade e conversões</strong><small>Permite medir campanhas. Dados sobre sua dúvida clínica não são enviados para criar públicos.</small></span>
+            <span><strong>Publicidade e conversões</strong><small>Permite medir campanhas e, em visitas de anúncio, incluir uma referência técnica no rascunho do WhatsApp. Nenhum nome, telefone ou conteúdo clínico é enviado ao Google nessa qualificação.</small></span>
           </label>
         </div>
       )}

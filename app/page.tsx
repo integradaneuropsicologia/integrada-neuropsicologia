@@ -68,7 +68,7 @@ const structuredData = {
       url: LANDING_URL,
       name: HOME_TITLE,
       description: HOME_DESCRIPTION,
-      dateModified: "2026-07-21",
+      dateModified: "2026-08-31",
       isPartOf: { "@id": `${MAIN_SITE_URL}/#website` },
       about: { "@id": `${LANDING_URL}#service` },
       mainEntity: { "@id": `${LANDING_URL}#service` },
@@ -227,7 +227,6 @@ const faqs = [
 export default function Home() {
   return (
     <div className="lp-page">
-      <link rel="preload" as="image" href="/assets/hero-online.webp" fetchPriority="high" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }}
@@ -349,7 +348,7 @@ export default function Home() {
             <span className="lp-professional-mark" aria-hidden="true">CL</span>
             <div><span>Responsável técnica</span><h3>Carla Luciana da Conceição Lima</h3><p>Psicóloga • CRP 08/39739</p></div>
           </div>
-          <p className="lp-professional-update">Responsabilidade técnica da Integrada Neuropsicologia. <time dateTime="2026-07-21">Conteúdo editorial atualizado em julho de 2026.</time></p>
+          <p className="lp-professional-update">Responsabilidade técnica da Integrada Neuropsicologia. <time dateTime="2026-08-31">Conteúdo editorial atualizado em agosto de 2026.</time></p>
         </section>
 
         <section className="lp-google-reviews" aria-labelledby="google-reviews-title">

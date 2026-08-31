@@ -33,16 +33,21 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.match(html, /Quero conversar sobre a avaliação/);
   assert.match(html, /brasileiros no Brasil e em outros países/i);
   assert.match(html, /Mais de 15 anos/);
+  assert.match(html, /Conteúdo editorial atualizado em agosto de 2026/i);
   assert.match(html, /Consulte as experiências compartilhadas diretamente no Google/i);
   assert.match(html, /https:\/\/maps\.app\.goo\.gl\/UTfmE9ovaxSuGaCc9/);
   assert.match(html, /não reproduzimos relatos individuais neste site/i);
   assert.match(html, /Carla Luciana da Conceição Lima/);
   assert.match(html, /CRP 08\/39739/);
   assert.match(html, /src="\/assets\/hero-online\.webp"/);
-  assert.match(html, /rel="preload"[^>]+href="\/assets\/hero-online\.webp"/i);
+  const heroPreloads = (html.match(/<link\b[^>]*rel="preload"[^>]*>/gi) ?? [])
+    .filter((tag) => /href="\/assets\/hero-online\.webp"/i.test(tag));
+  assert.equal(heroPreloads.length, 1, "the hero image should have exactly one preload");
   assert.match(html, /src="\/assets\/hero-online\.webp"[^>]+loading="eager"[^>]+fetchPriority="high"/i);
   assert.match(html, /Autorizo, de forma específica, o tratamento do meu nome/i);
   assert.match(html, /O conteúdo do formulário não é armazenado no servidor deste site/i);
+  assert.match(html, /uma referência técnica do clique pode ser incluída no rascunho para medir leads qualificados/i);
+  assert.match(html, /nenhum nome, telefone, texto clínico ou dado de saúde é enviado ao Google/i);
   assert.match(html, /href="\/politica-de-privacidade"/i);
   assert.match(html, /analytics_storage:\s*'denied'/i);
   assert.match(html, /ad_storage:\s*'denied'/i);
@@ -151,6 +156,12 @@ test("publishes a complete privacy policy for form and cookie data", async () =>
   assert.match(html, /WhatsApp\/Meta/i);
   assert.match(html, /Medição de audiência/i);
   assert.match(html, /Publicidade e conversões/i);
+  assert.match(html, /GCLID/);
+  assert.match(html, /GBRAID/);
+  assert.match(html, /WBRAID/);
+  assert.match(html, /Google Ads Data Manager/i);
+  assert.match(html, /não recebe nome, telefone, e-mail, mensagem do WhatsApp, queixa, hipótese diagnóstica ou outro dado clínico/i);
+  assert.match(html, /Última atualização: 31 de agosto de 2026/i);
   assert.match(html, /Carla Luciana da Conceição Lima/i);
   assert.match(html, /Preferências de cookies/i);
   assert.match(html, /href="\/avaliacao-neuropsicologica-online-adultos"/i);

@@ -12,7 +12,8 @@ Recebidos e validados por formato:
 - Google Ads: `AW-16711609590`;
 - Google Tag do Google Ads: `GT-WF83BXXS`;
 - conversão “Formulário para WhatsApp”: `u7ZRCJK1utQcEPbZ26A-`;
-- conversão “WhatsApp direto”: `w6oWCJW1utQcEPbZ26A-`.
+- conversão “WhatsApp direto”: `w6oWCJW1utQcEPbZ26A-`;
+- conversão offline “Neuro Online | Lead qualificado”: criada em 31/08/2026 como secundária, sem valor, contagem “uma”, janela de clique de 30 dias e atribuição baseada em dados.
 
 Somente o ID do contêiner entra no código do site. Os demais identificadores ficam nas tags nativas do próprio GTM. Não instalar o snippet manual de `gtag.js`, pois isso duplicaria a arquitetura gerenciada pelo GTM.
 
@@ -61,6 +62,37 @@ Não importar as duas conversões do GA4 para o Google Ads. A fonte oficial de c
 - Não usar Custom HTML, variáveis de DOM, Form variables ou Click URL para esta landing page.
 - Não colocar conteúdo clínico, nome ou dados do formulário em UTMs.
 
+## Qualificação offline de leads
+
+A fonte de dados **Neuro Online | Leads qualificados** foi conectada diretamente ao Google Ads Data Manager. A conexão é executada diariamente entre 13:00 e 14:00 (GMT-03:00) e importa somente registros cujo campo **qualification_status** seja igual a **qualified**.
+
+Cabeçalhos da planilha:
+
+    conversion_action | conversion_date_time | gclid | gbraid | wbraid | order_id | qualification_status
+
+Campos enviados ao Google Ads:
+
+- **conversion_date_time** → data/hora da conversão;
+- **gclid** → GCLID;
+- **gbraid** → GBRAID;
+- **wbraid** → WBRAID;
+- **order_id** → ID da transação, usado para deduplicação.
+
+O campo **qualification_status** é usado apenas no filtro da conexão. A ação de conversão já foi escolhida na configuração, portanto **conversion_action** funciona como referência operacional da planilha.
+
+Fluxo de operação:
+
+1. Quando a pessoa autoriza publicidade e chega por anúncio, a landing pode acrescentar ao rascunho do WhatsApp uma linha “Referência do anúncio” com GCLID, GBRAID ou WBRAID.
+2. A pessoa revisa o rascunho e pode remover essa linha antes de enviar.
+3. A equipe só cria uma linha na planilha quando o contato for efetivamente classificado como lead qualificado.
+4. Usar a data e a hora em que a qualificação ocorreu, com fuso explícito, por exemplo: **2026-08-31T14:30:00-03:00**.
+5. Preencher apenas um identificador de clique por linha, salvo quando houver mais de um identificador realmente recebido.
+6. Criar um **order_id** opaco e único, sem nome, telefone ou iniciais, por exemplo: **ql-20260831-0001**.
+7. Preencher **qualification_status** exatamente como **qualified**.
+8. Atualizar a planilha antes do horário da execução diária e conferir diagnósticos no Google Ads após o processamento.
+
+Não copiar para a planilha nome, telefone, e-mail, país de residência, texto do WhatsApp, queixa, hipótese diagnóstica ou qualquer informação clínica. A conversão permanece secundária e fora da otimização de lances durante 2 a 3 ciclos de validação. Só depois de uploads estáveis deve ser avaliada a migração do objetivo da campanha para o lead qualificado.
+
 ## Validação obrigatória
 
 Antes de publicar o site com o ID real, usar o Preview do GTM e o DebugView do GA4 para confirmar:
@@ -73,6 +105,9 @@ Antes de publicar o site com o ID real, usar o Preview do GTM e o DebugView do G
 - envio válido com um único `lead_form_submit` antes do WhatsApp;
 - CTA direto com somente `whatsapp_click`;
 - ausência de nome, interesse, mensagem, conteúdo clínico e URL do WhatsApp na `dataLayer` e na rede;
+- GCLID, GBRAID ou WBRAID acrescentado ao rascunho somente com consentimento de anúncios válido;
+- referência visível e removível antes do envio;
+- ausência de nome, telefone, texto clínico e dados de saúde na planilha mapeada para o Data Manager;
 - consentimento negado e concedido em sessões separadas;
 - fluxo completo em Android, iPhone/Safari e computador.
 
