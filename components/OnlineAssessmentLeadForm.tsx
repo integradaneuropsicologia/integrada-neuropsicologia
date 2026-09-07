@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, SyntheticEvent, useId, useState } from "react";
+import { FormEvent, SyntheticEvent, useEffect, useId, useRef, useState } from "react";
 import { TrackedWhatsAppLink } from "@/components/TrackedLandingLink";
 import {
   appendGoogleAdsClickReference,
@@ -30,6 +30,23 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
   const ctaLocation = placement === "hero" ? "hero" : "contact";
   const [trackingController] = useState(() => createLeadFormTrackingController(formLocation));
   const [submitted, setSubmitted] = useState(false);
+  const resetTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    const resetSubmission = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+      resetTimer.current = null;
+      trackingController.resetSubmission();
+      setSubmitted(false);
+    };
+
+    window.addEventListener("pageshow", resetSubmission);
+    return () => {
+      window.removeEventListener("pageshow", resetSubmission);
+      if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+    };
+  }, [trackingController]);
 
   function handleFieldInteraction(event: SyntheticEvent<HTMLFormElement>) {
     const element = event.target;
@@ -60,6 +77,12 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
     const accepted = trackingController.submit(whatsappDestination);
     if (!accepted) return;
     setSubmitted(true);
+    if (resetTimer.current !== null) window.clearTimeout(resetTimer.current);
+    resetTimer.current = window.setTimeout(() => {
+      trackingController.resetSubmission();
+      setSubmitted(false);
+      resetTimer.current = null;
+    }, 3000);
   }
 
   return (
@@ -86,15 +109,19 @@ export function OnlineAssessmentLeadForm({ placement }: OnlineAssessmentLeadForm
       </select>
 
       <label htmlFor={`${formId}-message`}>Quer acrescentar algo? <span>(opcional)</span></label>
-      <textarea id={`${formId}-message`} name="message" rows={3} placeholder="Ex.: isso está afetando meu trabalho e minha rotina" />
+      <textarea id={`${formId}-message`} name="message" rows={3} maxLength={500} placeholder="Ex.: isso está afetando meu trabalho e minha rotina" />
 
       <label className="lp-form-consent" htmlFor={`${formId}-privacy`}>
         <input id={`${formId}-privacy`} name="privacy-consent" type="checkbox" required />
-        <span>Autorizo, de forma específica, o tratamento do meu nome e das informações de saúde que eu escolher informar, exclusivamente para preparar esta mensagem e responder ao meu contato pelo WhatsApp. Posso revogar esta autorização pelo canal indicado na <a href="/politica-de-privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a>.</span>
+        <span>Autorizo o tratamento do meu nome e das informações que eu escolher informar — inclusive dados de saúde — somente para preparar esta mensagem e responder ao meu contato pelo WhatsApp. Posso revogar esta autorização pelo canal indicado na <a href="/politica-de-privacidade#direitos" target="_blank" rel="noreferrer">Política de Privacidade</a>.</span>
       </label>
 
       <button type="submit" className="lp-primary-button lp-form-submit" disabled={submitted}>{submitted ? "Abrindo o WhatsApp…" : "Quero conversar sobre a avaliação"} {!submitted && <span aria-hidden="true">→</span>}</button>
-      <p className="lp-form-note">Os dados preenchidos apenas preparam a mensagem que você poderá revisar antes de enviá-la pelo WhatsApp. O conteúdo do formulário não é armazenado no servidor deste site. Se você chegou por um anúncio e autorizou cookies de publicidade, uma referência técnica do clique pode ser incluída no rascunho para medir leads qualificados; você poderá revisá-la e removê-la antes do envio. Na qualificação offline, nenhum nome, telefone, texto clínico ou dado de saúde é enviado ao Google. Depois do envio, a conversa será tratada pela Integrada Neuropsicologia e pelo WhatsApp/Meta. Informações de navegação e cookies são tratadas conforme suas preferências e nossa <a href="/politica-de-privacidade" target="_blank" rel="noreferrer">Política de Privacidade</a>. Não envie exames ou documentos neste primeiro contato.</p>
+      <p className="lp-form-note">Os dados apenas preparam o rascunho que você revisará no WhatsApp e não são armazenados neste site. Após o envio, a conversa será tratada pela Integrada e pelo WhatsApp/Meta. Não envie exames ou documentos. Cookies e informações de navegação seguem suas preferências e nossa <a href="/politica-de-privacidade#cookies" target="_blank" rel="noreferrer">Política de Privacidade</a>.</p>
+      <details className="lp-form-measurement-details">
+        <summary>Como funciona a medição de campanhas</summary>
+        <p>Se a visita veio de um anúncio e você autorizou cookies de publicidade, uma referência técnica do clique pode ser mantida temporariamente nesta aba e incluída no rascunho. Você pode apagá-la antes de enviar. Na qualificação offline, nenhum nome, telefone, mensagem ou dado de saúde é enviado ao Google.</p>
+      </details>
       <p className="lp-form-alternative">Prefere não informar sua dificuldade aqui? <TrackedWhatsAppLink href={whatsappUrl("Olá! Gostaria de entender como funciona a avaliação neuropsicológica on-line para adultos.")} ctaLocation={ctaLocation} target="_blank" rel="noreferrer">Inicie uma conversa no WhatsApp sem preencher o formulário.</TrackedWhatsAppLink></p>
       {submitted && <p className="lp-form-status" role="status">Conversa preparada. O WhatsApp será aberto nesta mesma aba.</p>}
     </form>

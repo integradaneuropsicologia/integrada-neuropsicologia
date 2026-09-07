@@ -250,15 +250,15 @@ export default function Home() {
             <span className="lp-kicker"><i aria-hidden="true" /> On-line • Brasileiros 18+ • Brasil e exterior</span>
             <h1>Avaliação neuropsicológica <em>100% on-line para adultos.</em></h1>
             <p className="lp-hero-lede"><strong>Entenda o que está por trás das dificuldades de foco, memória, organização e relacionamento.</strong> O processo integra entrevista, histórico e procedimentos adequados à modalidade remota para compreender os impactos na vida real — com devolutiva clara e orientação.</p>
+            <div className="lp-hero-actions">
+              <TrackedWhatsAppLink className="lp-primary-button" href={directContact} ctaLocation="hero" target="_blank" rel="noreferrer">Quero conversar com a equipe <span aria-hidden="true">→</span></TrackedWhatsAppLink>
+              <a className="lp-quiet-link" href="#como-funciona">Entender como funciona <span aria-hidden="true">↓</span></a>
+            </div>
             <ul className="lp-hero-points">
               <li><span aria-hidden="true">✓</span> Atendimento individual e humanizado</li>
               <li><span aria-hidden="true">✓</span> Avaliação planejada para ser 100% on-line</li>
               <li><span aria-hidden="true">✓</span> Brasileiros com 18 anos ou mais, no Brasil e no exterior</li>
             </ul>
-            <div className="lp-hero-actions">
-              <TrackedWhatsAppLink className="lp-primary-button" href={directContact} ctaLocation="hero" target="_blank" rel="noreferrer">Quero conversar com a equipe <span aria-hidden="true">→</span></TrackedWhatsAppLink>
-              <a className="lp-quiet-link" href="#como-funciona">Entender como funciona <span aria-hidden="true">↓</span></a>
-            </div>
             <p className="lp-hero-note">Você não precisa chegar com um diagnóstico pronto. O primeiro passo é entender o que tem acontecido.</p>
           </div>
 

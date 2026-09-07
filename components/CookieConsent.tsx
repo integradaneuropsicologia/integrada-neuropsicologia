@@ -2,7 +2,11 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { updateGoogleConsent } from "@/lib/data-layer";
+import {
+  captureGoogleAdsClickReference,
+  clearGoogleAdsClickReference,
+  updateGoogleConsent,
+} from "@/lib/data-layer";
 import {
   COOKIE_CONSENT_STORAGE_KEY,
   COOKIE_CONSENT_VERSION,
@@ -81,6 +85,10 @@ export function CookieConsent() {
     const preference = readStoredPreference();
     if (preference) {
       applyConsent(preference);
+      if (preference.ads) captureGoogleAdsClickReference();
+      else clearGoogleAdsClickReference();
+    } else {
+      clearGoogleAdsClickReference();
     }
     const initializeUi = window.setTimeout(() => {
       setAnalytics(preference?.analytics ?? false);
@@ -118,6 +126,8 @@ export function CookieConsent() {
     }
     document.documentElement.setAttribute("data-integrada-cookie-consent", "stored");
     applyConsent(preference);
+    if (nextAds) captureGoogleAdsClickReference();
+    else clearGoogleAdsClickReference();
     setAnalytics(nextAnalytics);
     setAds(nextAds);
     setCustomizing(false);

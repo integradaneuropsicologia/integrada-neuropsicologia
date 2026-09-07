@@ -39,7 +39,7 @@ export default function PrivacyPolicyPage() {
           <span className="lp-section-label">Privacidade e proteção de dados</span>
           <h1>Política de Privacidade</h1>
           <p>Esta política explica, em linguagem direta, como dados pessoais, informações preenchidas no formulário e preferências de cookies são tratados nesta landing page de avaliação neuropsicológica on-line.</p>
-          <time dateTime="2026-08-31">Última atualização: 31 de agosto de 2026</time>
+          <time dateTime="2026-09-07">Última atualização: 7 de setembro de 2026</time>
         </section>
 
         <div className="privacy-content">
@@ -64,10 +64,10 @@ export default function PrivacyPolicyPage() {
             <p>Também podem existir dados técnicos de navegação, como endereço IP, data e horário, navegador, dispositivo, páginas acessadas e eventos gerais de interação. Quando a visita vem de um anúncio, os identificadores técnicos <code>GCLID</code>, <code>GBRAID</code> ou <code>WBRAID</code> podem ser tratados somente após sua autorização para publicidade. Dados de medição ou publicidade somente podem ser associados a cookies opcionais conforme a sua escolha.</p>
           </section>
 
-          <section>
+          <section id="formulario-whatsapp">
             <h2>3. Como funciona o formulário e o WhatsApp</h2>
             <p>O preenchimento acontece no seu navegador. Ao selecionar o botão de envio, o site monta um link com a mensagem e abre o ambiente do WhatsApp para sua revisão. O site não mantém uma cópia do conteúdo em banco de dados próprio.</p>
-            <p>Se a visita veio de um anúncio e a autorização para publicidade estiver válida, o rascunho também pode receber uma linha de referência técnica com <code>GCLID</code>, <code>GBRAID</code> ou <code>WBRAID</code>. Essa linha não descreve sua saúde e pode ser revisada ou apagada por você antes do envio. Se ela for removida, a qualificação offline daquele contato não será atribuída ao anúncio.</p>
+            <p>Se a visita veio de um anúncio e a autorização para publicidade estiver válida, o navegador pode manter, somente nesta aba, uma referência técnica com <code>GCLID</code>, <code>GBRAID</code> ou <code>WBRAID</code>. Ela é válida para uso por no máximo duas horas, permitindo preservar a atribuição durante a navegação entre as páginas desta landing page. O site agenda sua remoção ao fim desse prazo e também a descarta antes de qualquer leitura posterior. O rascunho pode receber essa referência. Ela não descreve sua saúde e pode ser revisada ou apagada por você antes do envio. Se ela for removida, a qualificação offline daquele contato não será atribuída ao anúncio.</p>
             <p>A mensagem é transferida ao ambiente do WhatsApp quando o link é aberto, e a equipe da Integrada recebe o conteúdo quando você confirma o envio. O WhatsApp é um serviço independente e aplica seus próprios termos e sua <a href="https://www.whatsapp.com/legal/privacy-policy?lang=pt_BR" target="_blank" rel="noreferrer">Política de Privacidade</a>.</p>
           </section>
 
@@ -84,10 +84,11 @@ export default function PrivacyPolicyPage() {
             <p>O tratamento pode se apoiar no consentimento, em providências solicitadas antes de uma eventual contratação e nas demais bases legais aplicáveis aos serviços de saúde e às obrigações profissionais. Quando o consentimento for a base utilizada, ele poderá ser revogado.</p>
           </section>
 
-          <section>
+          <section id="cookies">
             <h2>5. Cookies e armazenamento no navegador</h2>
             <p>A escolha de privacidade é guardada localmente no seu navegador por até 180 dias. Esse registro é necessário para lembrar a sua decisão e não contém a informação digitada no formulário.</p>
-            <p>Essa escolha controla apenas esta landing page no domínio sem <code>www</code>. O site institucional em <a href="https://www.integradaneuropsicologia.com.br" target="_blank" rel="noreferrer">www.integradaneuropsicologia.com.br</a> é uma origem separada, hospedada no Wix, e pode apresentar preferências próprias.</p>
+            <p>Com autorização para publicidade, uma referência técnica validada do anúncio pode ser mantida no armazenamento da sessão desta aba. Ela é válida para uso por no máximo duas horas; o site agenda sua remoção ao fim do prazo, descarta qualquer referência vencida antes de utilizá-la e o armazenamento da sessão termina quando a aba é encerrada. Esse registro contém apenas o tipo e o valor do identificador de clique e não contém nome, telefone, mensagem ou informação clínica.</p>
+            <p>Essa escolha controla apenas esta landing page no domínio sem <code>www</code>. O site institucional em <a href="https://www.integradaneuropsicologia.com.br" target="_blank" rel="noreferrer">www.integradaneuropsicologia.com.br</a> é uma origem separada e pode apresentar preferências próprias.</p>
             <div className="privacy-table-wrap">
               <table>
                 <thead><tr><th>Categoria</th><th>Finalidade</th><th>Quando é usada</th></tr></thead>
@@ -102,7 +103,7 @@ export default function PrivacyPolicyPage() {
             <CookieSettingsButton className="privacy-cookie-button" />
           </section>
 
-          <section>
+          <section id="medicao-de-campanhas">
             <h2>6. Publicidade e informações de saúde</h2>
             <p>O conteúdo clínico digitado no formulário não é enviado às ferramentas de medição ou publicidade e não é usado pela Integrada para formar públicos de anúncios personalizados. Eventos genéricos, como a abertura do contato pelo WhatsApp, podem ser medidos quando houver ferramenta ativa e consentimento aplicável.</p>
             <p>Para medir a qualidade dos contatos, a equipe pode registrar em uma planilha técnica apenas o nome da ação de conversão, data e hora da qualificação, <code>GCLID</code>, <code>GBRAID</code> ou <code>WBRAID</code> disponível, um identificador de deduplicação e o estado “qualificado”. Essa planilha é conectada ao Google Ads Data Manager e não recebe nome, telefone, e-mail, mensagem do WhatsApp, queixa, hipótese diagnóstica ou outro dado clínico.</p>
@@ -121,7 +122,7 @@ export default function PrivacyPolicyPage() {
             <p>Adotamos medidas razoáveis para limitar acesso e proteger os dados. Nenhuma transmissão ou sistema, porém, pode ser considerado absolutamente livre de riscos.</p>
           </section>
 
-          <section>
+          <section id="direitos">
             <h2>9. Seus direitos</h2>
             <p>Nos termos aplicáveis, você pode solicitar confirmação de tratamento, acesso, correção, informação sobre compartilhamento, anonimização, bloqueio ou eliminação, portabilidade quando cabível e revogação do consentimento.</p>
             <p>Para exercer seus direitos, fale conosco pelo <a href={privacyContact} target="_blank" rel="noreferrer">canal de privacidade no WhatsApp</a>. Poderemos pedir informações mínimas para confirmar sua identidade e proteger seus dados.</p>

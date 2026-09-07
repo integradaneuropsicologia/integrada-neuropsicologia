@@ -1,6 +1,7 @@
 /** Cloudflare Worker entry point for the Integrada website. */
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
+import { normalizeTrackingRequestForRender } from "../lib/request-normalization";
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -19,7 +20,7 @@ interface ExecutionContext {
 }
 
 const APEX_HOST = "integradaneuropsicologia.com.br";
-const WIX_SITE_URL = "https://www.integradaneuropsicologia.com.br";
+const WWW_SITE_URL = "https://www.integradaneuropsicologia.com.br";
 const LANDING_PATH = "/avaliacao-neuropsicologica-online-adultos";
 const SITES_PAGE_PATHS = new Set([
   LANDING_PATH,
@@ -78,10 +79,10 @@ const worker = {
     const url = new URL(request.url);
 
     if (url.hostname === APEX_HOST && !isSitesPath(url.pathname)) {
-      const wixUrl = new URL(WIX_SITE_URL);
-      wixUrl.pathname = url.pathname;
-      wixUrl.search = url.search;
-      return Response.redirect(wixUrl, 308);
+      const mainSiteUrl = new URL(WWW_SITE_URL);
+      mainSiteUrl.pathname = url.pathname;
+      mainSiteUrl.search = url.search;
+      return Response.redirect(mainSiteUrl, 308);
     }
 
     if (url.pathname === "/_vinext/image") {
@@ -96,7 +97,8 @@ const worker = {
     }
 
     if (isCacheableHtmlRequest(request, url.pathname)) {
-      const response = await handler.fetch(request, env, ctx);
+      const renderRequest = normalizeTrackingRequestForRender(request);
+      const response = await handler.fetch(renderRequest, env, ctx);
       if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) return response;
 
       return cacheableResponse(response);

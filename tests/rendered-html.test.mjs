@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { normalizeTrackingRequestForRender } from "../lib/request-normalization.ts";
+
 const landingPath = "/avaliacao-neuropsicologica-online-adultos";
 
 async function render(pathname = "/", hostname = "localhost") {
@@ -45,10 +47,11 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.equal(heroPreloads.length, 0, "the below-fold mobile hero image should not compete with critical text");
   assert.match(html, /src="\/assets\/hero-online\.webp"[^>]+loading="lazy"[^>]+decoding="async"/i);
   assert.doesNotMatch(html, /src="\/assets\/hero-online\.webp"[^>]+fetchPriority="high"/i);
-  assert.match(html, /Autorizo, de forma específica, o tratamento do meu nome/i);
-  assert.match(html, /O conteúdo do formulário não é armazenado no servidor deste site/i);
-  assert.match(html, /uma referência técnica do clique pode ser incluída no rascunho para medir leads qualificados/i);
-  assert.match(html, /nenhum nome, telefone, texto clínico ou dado de saúde é enviado ao Google/i);
+  assert.match(html, /Autorizo o tratamento do meu nome e das informações que eu escolher informar/i);
+  assert.match(html, /não são armazenados neste site/i);
+  assert.match(html, /Como funciona a medição de campanhas/i);
+  assert.match(html, /uma referência técnica do clique pode ser mantida temporariamente nesta aba/i);
+  assert.match(html, /nenhum nome, telefone, mensagem ou dado de saúde é enviado ao Google/i);
   assert.match(html, /href="\/politica-de-privacidade"/i);
   assert.match(html, /analytics_storage:\s*'denied'/i);
   assert.match(html, /ad_storage:\s*'denied'/i);
@@ -164,7 +167,9 @@ test("publishes a complete privacy policy for form and cookie data", async () =>
   assert.match(html, /WBRAID/);
   assert.match(html, /Google Ads Data Manager/i);
   assert.match(html, /não recebe nome, telefone, e-mail, mensagem do WhatsApp, queixa, hipótese diagnóstica ou outro dado clínico/i);
-  assert.match(html, /Última atualização: 31 de agosto de 2026/i);
+  assert.match(html, /Última atualização: 7 de setembro de 2026/i);
+  assert.match(html, /válida para uso por no máximo duas horas/i);
+  assert.doesNotMatch(html, /hospedada no Wix/i);
   assert.match(html, /Carla Luciana da Conceição Lima/i);
   assert.match(html, /Preferências de cookies/i);
   assert.match(html, /href="\/avaliacao-neuropsicologica-online-adultos"/i);
@@ -200,6 +205,11 @@ test("routes only the custom apex landing and privacy pages to Sites", async () 
   assert.equal(landingRscResponse.headers.get("location"), null);
   assert.match(landingRscResponse.headers.get("content-type") ?? "", /^text\/x-component\b/i);
 
+  const trackedLandingRscResponse = await render(`${landingPath}.rsc?gclid=Click123`, apex);
+  assert.equal(trackedLandingRscResponse.status, 200);
+  assert.equal(trackedLandingRscResponse.headers.get("location"), null);
+  assert.match(trackedLandingRscResponse.headers.get("content-type") ?? "", /^text\/x-component\b/i);
+
   const privacyResponse = await render("/politica-de-privacidade", apex);
   assert.equal(privacyResponse.status, 200);
 
@@ -219,6 +229,41 @@ test("routes only the custom apex landing and privacy pages to Sites", async () 
 
   const assetResponse = await render("/assets/logo.png", apex);
   assert.equal(assetResponse.headers.get("location"), null);
+});
+
+test("normalizes tracking parameters only for the internal HTML render", () => {
+  const originalUrl = `https://integradaneuropsicologia.com.br${landingPath}?gclid=Click123&utm_source=google&GBRAID=BraID123&keep=functional`;
+  const original = new Request(originalUrl, {
+    headers: { accept: "text/html", "x-test-header": "preserved" },
+  });
+
+  const normalized = normalizeTrackingRequestForRender(original);
+
+  assert.equal(normalized.url, `https://integradaneuropsicologia.com.br${landingPath}?keep=functional`);
+  assert.equal(original.url, originalUrl);
+  assert.equal(normalized.method, "GET");
+  assert.equal(normalized.headers.get("x-test-header"), "preserved");
+});
+
+test("normalizes tracking names case-insensitively without touching functional parameters", () => {
+  const request = new Request(`https://integradaneuropsicologia.com.br${landingPath}?GCLID=one&GCLID=two&Utm_Content=cta&_gl=linker&keep=yes`);
+  assert.equal(
+    normalizeTrackingRequestForRender(request).url,
+    `https://integradaneuropsicologia.com.br${landingPath}?keep=yes`,
+  );
+
+  const functionalRequest = new Request(`https://integradaneuropsicologia.com.br${landingPath}?keep=functional`);
+  assert.equal(normalizeTrackingRequestForRender(functionalRequest), functionalRequest);
+});
+
+test("tracked landing requests remain public HTML without server-rendering identifiers", async () => {
+  const response = await render(`${landingPath}?gclid=Click123&utm_source=google&utm_campaign=neuro`, "integradaneuropsicologia.com.br");
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("location"), null);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+  const html = await response.text();
+  assert.doesNotMatch(html, /Click123|utm_source|utm_campaign/i);
+  assert.match(html, new RegExp(`<link rel="canonical" href="https:\\/\\/integradaneuropsicologia\\.com\\.br${landingPath}"`, "i"));
 });
 
 test("server-renders a service route", async () => {

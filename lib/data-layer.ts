@@ -1,9 +1,16 @@
+import {
+  COOKIE_CONSENT_STORAGE_KEY,
+  COOKIE_CONSENT_VERSION,
+} from "./consent-config.ts";
+
 export const LANDING_PAGE_TYPE = "landing_neuro_online" as const;
 
-const ADS_CONSENT_STORAGE_KEY = "integrada-cookie-consent-v1";
-const ADS_CONSENT_VERSION = 1;
 const GOOGLE_AD_CLICK_ID_KEYS = ["gclid", "gbraid", "wbraid"] as const;
 const GOOGLE_AD_CLICK_ID_PATTERN = /^[A-Za-z0-9._~-]{6,512}$/;
+const GOOGLE_AD_CLICK_STORAGE_KEY = "integrada-google-ads-click-v1";
+const GOOGLE_AD_CLICK_STORAGE_VERSION = 1;
+const GOOGLE_AD_CLICK_LIFETIME_MS = 1000 * 60 * 60 * 2;
+let googleAdClickExpiryTimer: number | null = null;
 
 export type CtaLocation =
   | "header"
@@ -64,6 +71,15 @@ type EventTransport = {
 type ConsentPreference = {
   analytics: boolean;
   ads: boolean;
+};
+
+type GoogleAdClickIdKey = (typeof GOOGLE_AD_CLICK_ID_KEYS)[number];
+
+type StoredGoogleAdClickReference = {
+  version: 1;
+  key: GoogleAdClickIdKey;
+  value: string;
+  expiresAt: number;
 };
 
 type RedirectDependencies = {
@@ -195,18 +211,125 @@ export function trackGoogleReviewsClick() {
 
 function hasAdsMeasurementConsent() {
   try {
-    const raw = window.localStorage?.getItem(ADS_CONSENT_STORAGE_KEY);
+    const raw = window.localStorage?.getItem(COOKIE_CONSENT_STORAGE_KEY);
     if (!raw) return false;
     const consent = JSON.parse(raw) as {
       version?: number;
       ads?: boolean;
       expiresAt?: number;
     };
-    return consent.version === ADS_CONSENT_VERSION && consent.ads === true &&
+    return consent.version === COOKIE_CONSENT_VERSION && consent.ads === true &&
       typeof consent.expiresAt === "number" && consent.expiresAt > Date.now();
   } catch {
     return false;
   }
+}
+
+function currentGoogleAdClickReference(): Pick<StoredGoogleAdClickReference, "key" | "value"> | null {
+  try {
+    const currentHref = typeof window.location?.href === "string" ? window.location.href : "";
+    if (!currentHref) return null;
+
+    const currentUrl = new URL(currentHref);
+    for (const key of GOOGLE_AD_CLICK_ID_KEYS) {
+      const value = currentUrl.searchParams.get(key)?.trim() ?? "";
+      if (GOOGLE_AD_CLICK_ID_PATTERN.test(value)) return { key, value };
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function clearGoogleAdsClickExpiryTimer() {
+  if (googleAdClickExpiryTimer === null) return;
+  if (typeof window.clearTimeout === "function") window.clearTimeout(googleAdClickExpiryTimer);
+  googleAdClickExpiryTimer = null;
+}
+
+function scheduleGoogleAdsClickExpiry(expiresAt: number) {
+  clearGoogleAdsClickExpiryTimer();
+  if (typeof window.setTimeout !== "function") return;
+
+  const delay = Math.max(0, Math.min(expiresAt - Date.now(), GOOGLE_AD_CLICK_LIFETIME_MS));
+  googleAdClickExpiryTimer = window.setTimeout(() => {
+    googleAdClickExpiryTimer = null;
+    try {
+      window.sessionStorage?.removeItem(GOOGLE_AD_CLICK_STORAGE_KEY);
+    } catch {
+      // The reference remains unusable because every read still validates expiry.
+    }
+  }, delay);
+}
+
+function removeStoredGoogleAdClickReference() {
+  try {
+    window.sessionStorage?.removeItem(GOOGLE_AD_CLICK_STORAGE_KEY);
+  } catch {
+    // Keep the privacy-safe no-reference behavior when storage is unavailable.
+  }
+}
+
+function storedGoogleAdClickReference(): Pick<StoredGoogleAdClickReference, "key" | "value"> | null {
+  try {
+    const raw = window.sessionStorage?.getItem(GOOGLE_AD_CLICK_STORAGE_KEY);
+    if (!raw) return null;
+
+    const value = JSON.parse(raw) as Partial<StoredGoogleAdClickReference>;
+    const exactKeys = Object.keys(value).sort().join(",") === "expiresAt,key,value,version";
+    const validKey = GOOGLE_AD_CLICK_ID_KEYS.includes(value.key as GoogleAdClickIdKey);
+    const validValue = typeof value.value === "string" && GOOGLE_AD_CLICK_ID_PATTERN.test(value.value);
+    const validExpiry = typeof value.expiresAt === "number" &&
+      value.expiresAt > Date.now() &&
+      value.expiresAt <= Date.now() + GOOGLE_AD_CLICK_LIFETIME_MS;
+
+    if (!exactKeys || value.version !== GOOGLE_AD_CLICK_STORAGE_VERSION || !validKey || !validValue || !validExpiry) {
+      removeStoredGoogleAdClickReference();
+      return null;
+    }
+
+    scheduleGoogleAdsClickExpiry(value.expiresAt as number);
+    return { key: value.key as GoogleAdClickIdKey, value: value.value as string };
+  } catch {
+    removeStoredGoogleAdClickReference();
+    return null;
+  }
+}
+
+export function clearGoogleAdsClickReference() {
+  if (typeof window === "undefined") return;
+  clearGoogleAdsClickExpiryTimer();
+  removeStoredGoogleAdClickReference();
+}
+
+/**
+ * Keeps only a validated ad-click identifier in this browser tab for up to two
+ * hours. No URL, form content, name, phone number or clinical detail is stored.
+ */
+export function captureGoogleAdsClickReference() {
+  if (typeof window === "undefined" || !hasAdsMeasurementConsent()) {
+    clearGoogleAdsClickReference();
+    return null;
+  }
+
+  const currentReference = currentGoogleAdClickReference();
+  if (!currentReference) return storedGoogleAdClickReference();
+
+  const stored: StoredGoogleAdClickReference = {
+    version: GOOGLE_AD_CLICK_STORAGE_VERSION,
+    ...currentReference,
+    expiresAt: Date.now() + GOOGLE_AD_CLICK_LIFETIME_MS,
+  };
+
+  try {
+    window.sessionStorage?.setItem(GOOGLE_AD_CLICK_STORAGE_KEY, JSON.stringify(stored));
+  } catch {
+    // The current URL can still be used when session storage is unavailable.
+  }
+  scheduleGoogleAdsClickExpiry(stored.expiresAt);
+
+  return currentReference;
 }
 
 /**
@@ -217,22 +340,15 @@ function hasAdsMeasurementConsent() {
  * WhatsApp message timestamp.
  */
 export function appendGoogleAdsClickReference(whatsappDestination: string) {
-  if (typeof window === "undefined" || !hasAdsMeasurementConsent()) return whatsappDestination;
+  if (typeof window === "undefined") return whatsappDestination;
+
+  const clickReference = captureGoogleAdsClickReference();
+  if (!clickReference) return whatsappDestination;
 
   try {
-    const currentHref = typeof window.location?.href === "string" ? window.location.href : "";
-    if (!currentHref) return whatsappDestination;
-
-    const currentUrl = new URL(currentHref);
-    const matchedKey = GOOGLE_AD_CLICK_ID_KEYS.find((key) => currentUrl.searchParams.has(key));
-    if (!matchedKey) return whatsappDestination;
-
-    const clickId = currentUrl.searchParams.get(matchedKey)?.trim() ?? "";
-    if (!GOOGLE_AD_CLICK_ID_PATTERN.test(clickId)) return whatsappDestination;
-
     const destination = new URL(whatsappDestination);
     const currentText = destination.searchParams.get("text") ?? "";
-    const reference = "Referência do anúncio: " + matchedKey.toUpperCase() + "=" + clickId;
+    const reference = "Referência do anúncio: " + clickReference.key.toUpperCase() + "=" + clickReference.value;
     if (currentText.includes(reference)) return whatsappDestination;
 
     destination.searchParams.set("text", [currentText, reference].filter(Boolean).join("\n"));
@@ -279,6 +395,8 @@ export function createLeadFormTrackingController(
 ) {
   let started = false;
   let submitting = false;
+  let conversionRecorded = false;
+  const navigate = dependencies.navigate ?? ((destination: string) => window.location.assign(destination));
 
   return {
     start() {
@@ -293,8 +411,16 @@ export function createLeadFormTrackingController(
     submit(whatsappDestination: string) {
       if (submitting) return false;
       submitting = true;
+      if (conversionRecorded) {
+        navigate(whatsappDestination);
+        return true;
+      }
+      conversionRecorded = true;
       trackAndOpenWhatsApp(whatsappDestination, formLocation, dependencies);
       return true;
+    },
+    resetSubmission() {
+      submitting = false;
     },
   };
 }
