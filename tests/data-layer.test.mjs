@@ -1,0 +1,410 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+
+import {
+  appendGoogleAdsClickReference,
+  captureGoogleAdsClickReference,
+  clearGoogleAdsClickReference,
+  createLeadFormTrackingController,
+  pushDataLayer,
+  trackGoogleReviewsClick,
+  trackPhoneClick,
+  trackWhatsAppClick,
+  updateGoogleConsent,
+} from "../lib/data-layer.ts";
+
+function installWindow() {
+  const navigations = [];
+  const localValues = new Map();
+  const sessionValues = new Map();
+  globalThis.window = {
+    dataLayer: [],
+    localStorage: {
+      getItem: (key) => localValues.get(key) ?? null,
+      setItem: (key, value) => localValues.set(key, value),
+      removeItem: (key) => localValues.delete(key),
+    },
+    sessionStorage: {
+      getItem: (key) => sessionValues.get(key) ?? null,
+      setItem: (key, value) => sessionValues.set(key, value),
+      removeItem: (key) => sessionValues.delete(key),
+    },
+    location: {
+      assign(destination) {
+        navigations.push(destination);
+      },
+    },
+  };
+  return { window: globalThis.window, navigations, localValues, sessionValues };
+}
+
+test.afterEach(() => {
+  Reflect.deleteProperty(globalThis, "window");
+});
+
+test("emits only the allowlisted payload for each direct interaction", () => {
+  const { window } = installWindow();
+
+  trackWhatsAppClick("header");
+  trackPhoneClick();
+  trackGoogleReviewsClick();
+
+  assert.deepEqual(window.dataLayer, [
+    {
+      event: "whatsapp_click",
+      cta_location: "header",
+      contact_method: "whatsapp",
+      page_type: "landing_neuro_online",
+    },
+    {
+      event: "phone_click",
+      cta_location: "footer",
+      contact_method: "phone",
+      page_type: "landing_neuro_online",
+    },
+    {
+      event: "google_reviews_click",
+      cta_location: "reviews_section",
+      destination: "google_maps",
+      page_type: "landing_neuro_online",
+    },
+  ]);
+});
+
+test("drops unexpected runtime fields even when a JavaScript caller supplies them", () => {
+  const { window } = installWindow();
+
+  pushDataLayer("whatsapp_click", {
+    cta_location: "hero",
+    contact_method: "whatsapp",
+    page_type: "landing_neuro_online",
+    name: "NOME_SECRETO",
+    interest: "AUTISMO",
+    message: "MENSAGEM_SECRETA",
+    link_url: "https://wa.me/segredo",
+  });
+
+  assert.deepEqual(window.dataLayer, [{
+    event: "whatsapp_click",
+    cta_location: "hero",
+    contact_method: "whatsapp",
+    page_type: "landing_neuro_online",
+  }]);
+
+  pushDataLayer("whatsapp_click", {
+    cta_location: "NOME_SECRETO",
+    contact_method: "whatsapp",
+    page_type: "landing_neuro_online",
+  });
+  assert.equal(window.dataLayer.length, 1);
+});
+
+test("records form start once per form controller", () => {
+  const { window } = installWindow();
+  const hero = createLeadFormTrackingController("hero");
+  const contact = createLeadFormTrackingController("contact_section");
+
+  assert.equal(hero.start(), true);
+  assert.equal(hero.start(), false);
+  assert.equal(hero.start(), false);
+  assert.equal(contact.start(), true);
+
+  assert.deepEqual(window.dataLayer, [
+    {
+      event: "lead_form_start",
+      form_location: "hero",
+      page_type: "landing_neuro_online",
+    },
+    {
+      event: "lead_form_start",
+      form_location: "contact_section",
+      page_type: "landing_neuro_online",
+    },
+  ]);
+});
+
+test("records a valid form submission once and redirects only after the event", () => {
+  const { window } = installWindow();
+  const scheduled = [];
+  const navigations = [];
+  const controller = createLeadFormTrackingController("hero", {
+    navigate: (destination) => navigations.push(destination),
+    schedule: (callback, delay) => scheduled.push({ callback, delay }),
+  });
+  const whatsappDestination = "https://wa.me/5541992113665?text=NOME_SECRETO%20AUTISMO%20MENSAGEM_SECRETA";
+
+  assert.equal(controller.submit(whatsappDestination), true);
+  assert.equal(controller.submit(whatsappDestination), false);
+  assert.equal(window.dataLayer.length, 1);
+  assert.equal(navigations.length, 0);
+
+  const event = window.dataLayer[0];
+  const { eventCallback, eventTimeout, ...safePayload } = event;
+  assert.deepEqual(safePayload, {
+    event: "lead_form_submit",
+    form_location: "hero",
+    contact_method: "whatsapp",
+    page_type: "landing_neuro_online",
+  });
+  assert.equal(typeof eventCallback, "function");
+  assert.equal(eventTimeout, 1000);
+  assert.equal(scheduled.length, 1);
+  assert.equal(scheduled[0].delay, 1200);
+
+  eventCallback();
+  scheduled[0].callback();
+  assert.deepEqual(navigations, [whatsappDestination]);
+
+  const serializedEvents = JSON.stringify(window.dataLayer);
+  assert.doesNotMatch(serializedEvents, /NOME_SECRETO|AUTISMO|MENSAGEM_SECRETA|wa\.me/i);
+  for (const forbiddenKey of ["name", "interest", "message", "link_url", "phone", "whatsapp_url"]) {
+    assert.equal(Object.hasOwn(event, forbiddenKey), false);
+  }
+});
+
+test("keeps direct WhatsApp clicks and form submissions as separate events", () => {
+  const { window } = installWindow();
+  const scheduled = [];
+  const controller = createLeadFormTrackingController("contact_section", {
+    navigate: () => {},
+    schedule: (callback) => scheduled.push(callback),
+  });
+
+  trackWhatsAppClick("contact");
+  controller.submit("https://wa.me/example");
+
+  assert.deepEqual(window.dataLayer.map((entry) => entry.event), [
+    "whatsapp_click",
+    "lead_form_submit",
+  ]);
+  assert.equal(scheduled.length, 1);
+});
+
+test("adds consented GCLID, GBRAID or WBRAID only to the WhatsApp draft", () => {
+  for (const [parameter, label] of [
+    ["gclid", "GCLID"],
+    ["gbraid", "GBRAID"],
+    ["wbraid", "WBRAID"],
+  ]) {
+    const { window } = installWindow();
+    window.location.href = `https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos?${parameter}=AbC_123-test`;
+    window.localStorage = {
+      getItem(key) {
+        if (key !== "integrada-cookie-consent-v1") return null;
+        return JSON.stringify({
+          version: 1,
+          ads: true,
+          expiresAt: Date.now() + 60_000,
+        });
+      },
+    };
+
+    const destination = appendGoogleAdsClickReference("https://wa.me/5541992113665?text=Ol%C3%A1");
+    const parsed = new URL(destination);
+
+    assert.equal(parsed.searchParams.get("text"), `Olá\nReferência do anúncio: ${label}=AbC_123-test`);
+    assert.deepEqual(window.dataLayer, []);
+  }
+});
+
+test("asks the deferred GTM loader to start before queuing a tracked interaction", () => {
+  const { window } = installWindow();
+  const calls = [];
+  window.integradaLoadGtm = () => calls.push(window.dataLayer.length);
+
+  trackWhatsAppClick("hero");
+
+  assert.deepEqual(calls, [0]);
+  assert.equal(window.dataLayer[0].event, "whatsapp_click");
+});
+
+test("does not append an ad reference without advertising consent", () => {
+  const { window } = installWindow();
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos?gclid=AbC_123-test";
+  window.localStorage = { getItem: () => null };
+  const original = "https://wa.me/5541992113665?text=Ol%C3%A1";
+
+  assert.equal(appendGoogleAdsClickReference(original), original);
+});
+
+test("does not append an ad reference after advertising consent expires", () => {
+  const { window } = installWindow();
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos?wbraid=AbC_123-test";
+  window.localStorage = {
+    getItem: () => JSON.stringify({
+      version: 1,
+      ads: true,
+      expiresAt: Date.now() - 1,
+    }),
+  };
+  const original = "https://wa.me/5541992113665?text=Ol%C3%A1";
+
+  assert.equal(appendGoogleAdsClickReference(original), original);
+});
+
+test("preserves a consented click reference across landing-page navigation", () => {
+  const { window, localValues, sessionValues } = installWindow();
+  localValues.set("integrada-cookie-consent-v1", JSON.stringify({
+    version: 1,
+    ads: true,
+    expiresAt: Date.now() + 60_000,
+  }));
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos?gclid=Click_123-test";
+
+  assert.deepEqual(captureGoogleAdsClickReference(), { key: "gclid", value: "Click_123-test" });
+  const stored = JSON.parse(sessionValues.get("integrada-google-ads-click-v1"));
+  assert.deepEqual(Object.keys(stored).sort(), ["expiresAt", "key", "value", "version"]);
+
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos/como-funciona";
+  const destination = appendGoogleAdsClickReference("https://wa.me/5541992113665?text=Ol%C3%A1");
+  assert.equal(new URL(destination).searchParams.get("text"), "Olá\nReferência do anúncio: GCLID=Click_123-test");
+  assert.deepEqual(window.dataLayer, []);
+});
+
+test("clears the stored click reference when advertising consent is unavailable", () => {
+  const { window, sessionValues } = installWindow();
+  sessionValues.set("integrada-google-ads-click-v1", JSON.stringify({
+    version: 1,
+    key: "gclid",
+    value: "Click_123-test",
+    expiresAt: Date.now() + 60_000,
+  }));
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos/contato";
+
+  const original = "https://wa.me/5541992113665?text=Ol%C3%A1";
+  assert.equal(appendGoogleAdsClickReference(original), original);
+  assert.equal(sessionValues.has("integrada-google-ads-click-v1"), false);
+
+  clearGoogleAdsClickReference();
+  assert.equal(sessionValues.has("integrada-google-ads-click-v1"), false);
+});
+
+test("rejects expired or malformed stored click references", () => {
+  const { window, localValues, sessionValues } = installWindow();
+  localValues.set("integrada-cookie-consent-v1", JSON.stringify({
+    version: 1,
+    ads: true,
+    expiresAt: Date.now() + 60_000,
+  }));
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos/duvidas";
+  sessionValues.set("integrada-google-ads-click-v1", JSON.stringify({
+    version: 1,
+    key: "gclid",
+    value: "<script>",
+    expiresAt: Date.now() + 60_000,
+  }));
+
+  const original = "https://wa.me/5541992113665?text=Ol%C3%A1";
+  assert.equal(appendGoogleAdsClickReference(original), original);
+  assert.equal(sessionValues.has("integrada-google-ads-click-v1"), false);
+});
+
+test("cleans corrupted, expired or over-specified stored references", () => {
+  const { window, localValues, sessionValues } = installWindow();
+  localValues.set("integrada-cookie-consent-v1", JSON.stringify({
+    version: 1,
+    ads: true,
+    expiresAt: Date.now() + 60_000,
+  }));
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos/duvidas";
+  const original = "https://wa.me/5541992113665?text=Ol%C3%A1";
+
+  for (const stored of [
+    "{corrupted",
+    JSON.stringify({ version: 1, key: "gclid", value: "Click_123-test", expiresAt: Date.now() - 1 }),
+    JSON.stringify({ version: 1, key: "gclid", value: "Click_123-test", expiresAt: Date.now() + 60_000, message: "not-allowed" }),
+  ]) {
+    sessionValues.set("integrada-google-ads-click-v1", stored);
+    assert.equal(appendGoogleAdsClickReference(original), original);
+    assert.equal(sessionValues.has("integrada-google-ads-click-v1"), false);
+  }
+});
+
+test("uses the first valid click identifier in priority order", () => {
+  const { window, localValues } = installWindow();
+  localValues.set("integrada-cookie-consent-v1", JSON.stringify({
+    version: 1,
+    ads: true,
+    expiresAt: Date.now() + 60_000,
+  }));
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos?gclid=&wbraid=Valid_123-test";
+
+  const destination = appendGoogleAdsClickReference("https://wa.me/5541992113665?text=Ol%C3%A1");
+  assert.equal(new URL(destination).searchParams.get("text"), "Olá\nReferência do anúncio: WBRAID=Valid_123-test");
+});
+
+test("schedules physical removal of the session reference at expiry", () => {
+  const { window, localValues, sessionValues } = installWindow();
+  const callbacks = [];
+  window.setTimeout = (callback, delay) => {
+    callbacks.push({ callback, delay });
+    return callbacks.length;
+  };
+  window.clearTimeout = () => {};
+  localValues.set("integrada-cookie-consent-v1", JSON.stringify({
+    version: 1,
+    ads: true,
+    expiresAt: Date.now() + 60_000,
+  }));
+  window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos?gclid=Expiry_123-test";
+
+  captureGoogleAdsClickReference();
+  assert.equal(callbacks.length, 1);
+  assert.ok(callbacks[0].delay > 0 && callbacks[0].delay <= 2 * 60 * 60 * 1000);
+  assert.equal(sessionValues.has("integrada-google-ads-click-v1"), true);
+
+  callbacks[0].callback();
+  assert.equal(sessionValues.has("integrada-google-ads-click-v1"), false);
+});
+
+test("the fallback and GTM callback share the same redirect guard", () => {
+  const { window } = installWindow();
+  const scheduled = [];
+  const navigations = [];
+  const controller = createLeadFormTrackingController("contact_section", {
+    navigate: (destination) => navigations.push(destination),
+    schedule: (callback) => scheduled.push(callback),
+  });
+
+  controller.submit("https://wa.me/example");
+  scheduled[0]();
+  window.dataLayer[0].eventCallback();
+
+  assert.deepEqual(navigations, ["https://wa.me/example"]);
+});
+
+test("allows WhatsApp retry after reset without recording a duplicate conversion", () => {
+  const { window } = installWindow();
+  const scheduled = [];
+  const navigations = [];
+  const controller = createLeadFormTrackingController("hero", {
+    navigate: (destination) => navigations.push(destination),
+    schedule: (callback) => scheduled.push(callback),
+  });
+
+  assert.equal(controller.submit("https://wa.me/first"), true);
+  assert.equal(controller.submit("https://wa.me/blocked"), false);
+  controller.resetSubmission();
+  assert.equal(controller.submit("https://wa.me/second"), true);
+  assert.equal(scheduled.length, 1);
+  assert.deepEqual(navigations, ["https://wa.me/second"]);
+  assert.deepEqual(window.dataLayer.map((entry) => entry.event), ["lead_form_submit"]);
+});
+
+test("queues a single Consent Mode v2 update with personalization denied", () => {
+  const { window } = installWindow();
+
+  updateGoogleConsent({ analytics: true, ads: true });
+
+  assert.equal(window.dataLayer.length, 1);
+  assert.deepEqual(Array.from(window.dataLayer[0]), [
+    "consent",
+    "update",
+    {
+      analytics_storage: "granted",
+      ad_storage: "granted",
+      ad_user_data: "granted",
+      ad_personalization: "denied",
+    },
+  ]);
+});

@@ -1,24 +1,49 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { CookieConsent } from "@/components/CookieConsent";
+import {
+  GoogleConsentDefaults,
+  GoogleTagManagerHead,
+  GoogleTagManagerNoScript,
+  resolveGtmContainerId,
+} from "@/components/GoogleTagManager";
+import { GTM_CONTAINER_ID } from "@/lib/google-tag-config";
+import { HOME_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const requestHeaders = await headers();
-  const requestedHost = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  const host = requestedHost && /^[a-z0-9.-]+(?::\d+)?$/i.test(requestedHost) ? requestedHost : "integradaneuropsicologia.com.br";
-  const requestedProtocol = requestHeaders.get("x-forwarded-proto");
-  const protocol = requestedProtocol === "http" || requestedProtocol === "https" ? requestedProtocol : (host.includes("localhost") ? "http" : "https");
-  const origin = `${protocol}://${host}`;
-  return {
-    metadataBase: new URL(origin),
-    title: { default: "Avaliação Neuropsicológica On-line para Adultos | Integrada Neuropsicologia", template: "%s | Integrada Neuropsicologia" },
-    description: "Avaliação neuropsicológica on-line para adultos que querem compreender dificuldades de foco, memória e organização, com triagem responsável e orientação clara.",
-    icons: { icon: "/assets/logo.png", shortcut: "/assets/logo.png", apple: "/assets/logo.png" },
-    openGraph: { type: "website", locale: "pt_BR", siteName: "Integrada Neuropsicologia", title: "Avaliação Neuropsicológica On-line para Adultos", description: "Entenda o que está por trás das dificuldades de foco, memória e organização.", images: [{ url: `${origin}/og.png`, alt: "Avaliação neuropsicológica on-line para adultos — Integrada Neuropsicologia" }] },
-    twitter: { card: "summary_large_image", title: "Avaliação Neuropsicológica On-line para Adultos", description: "Entenda o que está por trás das dificuldades de foco, memória e organização.", images: [`${origin}/og.png`] },
-  };
-}
+const gtmContainerId = resolveGtmContainerId(GTM_CONTAINER_ID);
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: { default: SITE_NAME, template: `%s | ${SITE_NAME}` },
+  description: HOME_DESCRIPTION,
+  applicationName: SITE_NAME,
+  category: "Saúde",
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  referrer: "origin-when-cross-origin",
+  verification: { google: "WQqzIuO-fBHkrlX9jhelg58ubDCZEmVNLFnbivLY9os" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  icons: { icon: "/assets/logo.png", shortcut: "/assets/logo.png", apple: "/assets/logo.png" },
+};
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR"><body>{children}</body></html>;
+  return (
+    <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <GoogleConsentDefaults />
+        <GoogleTagManagerHead containerId={gtmContainerId} />
+      </head>
+      <body><GoogleTagManagerNoScript containerId={gtmContainerId} />{children}<CookieConsent /></body>
+    </html>
+  );
 }

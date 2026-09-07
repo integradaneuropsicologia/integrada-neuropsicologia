@@ -83,7 +83,7 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Link href="/" className="brand" aria-label="Integrada Neuropsicologia — início">
+        <Link href="/" className="brand">
           <span className="brand-mark"><Image src="/assets/logo.png" alt="" width={32} height={32} priority unoptimized /></span>
           <strong>Integrada Neuropsicologia</strong>
         </Link>

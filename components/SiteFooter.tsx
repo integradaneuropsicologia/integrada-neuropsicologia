@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { CookieSettingsButton } from "@/components/CookieConsent";
 import { evaluationNav, testNav, therapyNav, whatsappUrl } from "@/lib/site-data";
 
 export function SiteFooter() {
@@ -25,7 +26,7 @@ export function SiteFooter() {
         <div><h3>Psicoterapia</h3>{therapyNav.map(([n, h]) => <Link key={h} href={h}>{n}</Link>)}</div>
         <div><h3>Conteúdos</h3>{testNav.map(([n, h]) => <Link key={h} href={h}>{n}</Link>)}<Link href="/blog">Blog</Link><Link href="/jogosdeestimulaçãomental">Jogos mentais</Link></div>
       </div>
-      <div className="footer-bottom"><span>© {new Date().getFullYear()} Integrada Neuropsicologia</span><span>Curitiba • Atendimento presencial e on-line</span></div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} Integrada Neuropsicologia</span><span className="footer-privacy-links"><Link href="/politica-de-privacidade">Política de Privacidade</Link><CookieSettingsButton /></span><span>Curitiba • Atendimento presencial e on-line</span></div>
     </footer>
   );
 }

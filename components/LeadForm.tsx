@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { whatsappUrl } from "@/lib/site-data";
 
-export function LeadForm({ context = "Site da Integrada Neuropsicologia" }: { context?: string }) {
+export function LeadForm() {
   const [sent, setSent] = useState(false);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -11,7 +11,6 @@ export function LeadForm({ context = "Site da Integrada Neuropsicologia" }: { co
     const data = new FormData(event.currentTarget);
     const message = [
       "Olá! Preenchi o formulário do site.",
-      `Origem: ${context}`,
       `Nome: ${data.get("name")}`,
       `Interesse: ${data.get("interest")}`,
       `Mensagem: ${data.get("message") || "Não informada"}`,

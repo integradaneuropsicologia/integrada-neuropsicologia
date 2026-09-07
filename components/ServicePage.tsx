@@ -27,7 +27,7 @@ export function ServicePage({ data }: { data: ServicePageData }) {
           <div className="service-hero-image"><Image src={data.image} alt={data.imageAlt} width={760} height={720} sizes="(max-width: 860px) 100vw, 45vw" priority unoptimized /></div>
         </section>
         <section className="trust-strip" aria-label="Diferenciais da clínica">
-          <div><strong>14+ anos</strong><span>de experiência clínica</span></div>
+          <div><strong>Mais de 15 anos</strong><span>de experiência clínica</span></div>
           <div><strong>Atendimento humano</strong><span>escuta antes de qualquer decisão</span></div>
           <div><strong>Laudo aplicável</strong><span>orientações claras para a rotina</span></div>
           <div><strong>Presencial e on-line</strong><span>cuidado que cabe na sua realidade</span></div>
@@ -56,7 +56,7 @@ export function ServicePage({ data }: { data: ServicePageData }) {
         </section>
 
         <section className="closing-band"><div><span className="eyebrow">Próximo passo</span><h2>{data.closingTitle}</h2><p>{data.closingText}</p></div><a className="button button-light" href={contact} target="_blank" rel="noreferrer">Ver disponibilidade</a></section>
-        <LeadForm context={data.eyebrow} />
+        <LeadForm />
       </main>
       <a className="whatsapp-float" href={contact} target="_blank" rel="noreferrer" aria-label="Falar com a Integrada pelo WhatsApp">WhatsApp</a>
       <SiteFooter />
