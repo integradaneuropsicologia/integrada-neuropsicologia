@@ -91,6 +91,7 @@ declare global {
   interface Window {
     dataLayer: unknown[];
     gtag?: (...args: unknown[]) => void;
+    integradaLoadGtm?: () => void;
   }
 }
 
@@ -108,6 +109,7 @@ export function pushDataLayer<EventName extends LandingEventName>(
   parameters: LandingEventParameters[EventName],
   transport: EventTransport = {},
 ) {
+  window.integradaLoadGtm?.();
   let safeEvent: Record<string, unknown>;
 
   switch (eventName) {

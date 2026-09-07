@@ -14,6 +14,12 @@ const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
 const localBindingConfig = {
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
+  assets: {
+    directory: "dist/client",
+    not_found_handling: "none" as const,
+    binding: "ASSETS",
+    run_worker_first: ["/integrada-static-html-cache/*"],
+  },
   d1_databases: d1
     ? [
         {

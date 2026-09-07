@@ -2,6 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { normalizeTrackingRequestForRender } from "../lib/request-normalization.ts";
+import {
+  STATIC_HTML_PAGE_PATHS,
+  staticHtmlAssetPath,
+  staticHtmlAssetRequestPath,
+} from "../lib/static-html.ts";
 
 const landingPath = "/avaliacao-neuropsicologica-online-adultos";
 
@@ -13,6 +18,26 @@ async function render(pathname = "/", hostname = "localhost") {
   return worker.fetch(
     new Request(`https://${hostname}${pathname}`, { headers: { accept: "text/html" } }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
+  );
+}
+
+async function renderWithAssets(
+  pathname,
+  assetsFetch,
+  hostname = "integradaneuropsicologia.com.br",
+  requestInit = {},
+) {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("test-assets", `${process.pid}-${Date.now()}-${hostname}-${pathname}`);
+  const { default: worker } = await import(workerUrl.href);
+
+  return worker.fetch(
+    new Request(`https://${hostname}${pathname}`, {
+      ...requestInit,
+      headers: { accept: "text/html", ...requestInit.headers },
+    }),
+    { ASSETS: { fetch: assetsFetch } },
     { waitUntil() {}, passThroughOnException() {} },
   );
 }
@@ -99,6 +124,13 @@ test("server-renders the adult online assessment landing page", async () => {
   assert.equal((gtmBodyMarkup.match(/googletagmanager\.com\/ns\.html\?id=/g) ?? []).length, 1);
   assert.equal((gtmHeadMarkup.match(/GTM-KHPMDWM9/g) ?? []).length, 1);
   assert.equal((gtmBodyMarkup.match(/GTM-KHPMDWM9/g) ?? []).length, 1);
+  assert.match(gtmHeadMarkup, /integradaLoadGtm=load/i);
+  assert.match(gtmHeadMarkup, /setTimeout\(load,2500\)/i);
+  assert.match(gtmHeadMarkup, /addEventListener\('pointerdown',load/i);
+  assert.match(gtmHeadMarkup, /addEventListener\('touchstart',load/i);
+  assert.match(gtmHeadMarkup, /addEventListener\('keydown',load/i);
+  assert.match(gtmHeadMarkup, /gtm_\(\?:debug\|preview\|auth\)/i);
+  assert.ok(gtmHeadMarkup.indexOf("function load()") < gtmHeadMarkup.indexOf("googletagmanager.com/gtm.js"));
   assert.doesNotMatch(html, /chatgpt\.site/i);
   assert.doesNotMatch(html, /triagem|Origem:|14\+? anos/i);
   assert.doesNotMatch(html, /\/_vinext\/image/);
@@ -254,6 +286,93 @@ test("normalizes tracking names case-insensitively without touching functional p
 
   const functionalRequest = new Request(`https://integradaneuropsicologia.com.br${landingPath}?keep=functional`);
   assert.equal(normalizeTrackingRequestForRender(functionalRequest), functionalRequest);
+});
+
+test("maps every public landing HTML page to a versioned private static asset", () => {
+  assert.equal(new Set(STATIC_HTML_PAGE_PATHS).size, STATIC_HTML_PAGE_PATHS.length);
+  for (const pathname of STATIC_HTML_PAGE_PATHS) {
+    const assetPath = staticHtmlAssetPath(pathname);
+    assert.match(assetPath ?? "", /^\/integrada-static-html-cache\/v19\//);
+    assert.match(assetPath ?? "", /\/index\.html$/);
+    assert.equal(staticHtmlAssetRequestPath(pathname), assetPath?.slice(0, -"index.html".length));
+  }
+  assert.equal(staticHtmlAssetPath("/"), null);
+  assert.equal(staticHtmlAssetPath(`${landingPath}.rsc`), null);
+});
+
+test("serves tracking-only landing requests from one stable pre-rendered asset", async () => {
+  const requestedAssets = [];
+  const assetsFetch = async (request) => {
+    requestedAssets.push(request.url);
+    return new Response("<!DOCTYPE html><html><body>STATIC-V19</body></html>", {
+      status: 200,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  };
+
+  const first = await renderWithAssets(`${landingPath}?gclid=ClickOne&utm_source=google`, assetsFetch);
+  const second = await renderWithAssets(`${landingPath}?wbraid=ClickTwo&gad_source=1`, assetsFetch);
+
+  assert.equal(await first.text(), "<!DOCTYPE html><html><body>STATIC-V19</body></html>");
+  assert.equal(await second.text(), "<!DOCTYPE html><html><body>STATIC-V19</body></html>");
+  assert.equal(first.headers.get("x-integrada-html-cache"), "HIT");
+  assert.equal(second.headers.get("x-integrada-html-cache"), "HIT");
+  assert.equal(first.headers.get("x-vinext-cache"), "STATIC");
+  for (const token of ["RSC", "Accept", "Next-Router-State-Tree", "Next-Url", "X-Vinext-Rsc-Render-Mode"]) {
+    assert.match(first.headers.get("vary") ?? "", new RegExp(token, "i"));
+  }
+  assert.match(first.headers.get("cache-control") ?? "", /s-maxage=86400/i);
+  assert.equal(requestedAssets.length, 2);
+  assert.equal(requestedAssets[0], requestedAssets[1]);
+  assert.equal(new URL(requestedAssets[0]).pathname, staticHtmlAssetRequestPath(landingPath));
+  assert.equal(new URL(requestedAssets[0]).search, "");
+});
+
+test("bypasses pre-rendered HTML for functional parameters and unsafe asset responses", async () => {
+  let functionalAssetCalls = 0;
+  const functionalResponse = await renderWithAssets(`${landingPath}?keep=functional`, async () => {
+    functionalAssetCalls += 1;
+    return new Response("unexpected", { headers: { "content-type": "text/html" } });
+  });
+  assert.equal(functionalAssetCalls, 0);
+  assert.equal(functionalResponse.headers.get("x-integrada-html-cache"), "MISS");
+  assert.match(await functionalResponse.text(), /Avaliação neuropsicológica/i);
+
+  const cookieResponse = await renderWithAssets(landingPath, async () => new Response("unsafe", {
+    status: 200,
+    headers: { "content-type": "text/html", "set-cookie": "private=value" },
+  }));
+  assert.equal(cookieResponse.headers.get("x-integrada-html-cache"), "MISS");
+  assert.match(await cookieResponse.text(), /Avaliação neuropsicológica/i);
+
+  const missingResponse = await renderWithAssets(landingPath, async () => new Response("missing", { status: 404 }));
+  assert.equal(missingResponse.headers.get("x-integrada-html-cache"), "MISS");
+  assert.match(await missingResponse.text(), /Avaliação neuropsicológica/i);
+});
+
+test("never serves the static document to stateful, ranged or RSC requests", async () => {
+  for (const headers of [
+    { authorization: "Bearer test" },
+    { range: "bytes=0-100" },
+    { rsc: "1" },
+    { "next-action": "action-id" },
+    { "next-router-state-tree": "state" },
+    { cookie: "other=value; __prerender_bypass=preview" },
+  ]) {
+    let assetCalls = 0;
+    await renderWithAssets(landingPath, async () => {
+      assetCalls += 1;
+      return new Response("unexpected", { headers: { "content-type": "text/html" } });
+    }, "integradaneuropsicologia.com.br", { headers });
+    assert.equal(assetCalls, 0, `static asset should be bypassed for ${Object.keys(headers)[0]}`);
+  }
+});
+
+test("does not expose the internal static HTML asset path through the worker", async () => {
+  const response = await render("/integrada-static-html-cache/v19/avaliacao-neuropsicologica-online-adultos/index.html", "integradaneuropsicologia.com.br");
+  assert.equal(response.status, 404);
+  assert.equal(response.headers.get("location"), null);
+  assert.match(response.headers.get("x-robots-tag") ?? "", /noindex/i);
 });
 
 test("tracked landing requests remain public HTML without server-rendering identifiers", async () => {

@@ -677,12 +677,13 @@ html[data-integrada-cookie-consent="stored"] .cookie-consent { display:none; }
 
 @media (max-width:620px) {
   .lp-page { padding-bottom:calc(70px + env(safe-area-inset-bottom)); }
-  .lp-header { height:68px; padding:0 18px; }
+  .lp-header { height:68px; padding:0 18px; background:#fffefa; backdrop-filter:none; }
   .lp-brand img { width:34px; height:34px; }
   .lp-brand small { display:none; }
   .lp-header-cta { min-height:44px; padding:0 15px; font-size:.75rem; }
   .lp-page section[id] { scroll-margin-top:75px; }
   .lp-hero { padding:34px 20px 52px; }
+  .lp-hero:before { display:none; }
   .lp-hero-copy { padding-top:0; }
   .lp-hero h1 { margin-bottom:16px; font-size:clamp(2.35rem,11vw,3.15rem); }
   .lp-hero-lede { margin-bottom:18px; font-size:1rem; line-height:1.55; }
@@ -690,6 +691,7 @@ html[data-integrada-cookie-consent="stored"] .cookie-consent { display:none; }
   .lp-hero-actions { margin-bottom:22px; align-items:flex-start; flex-direction:column; gap:14px; }
   .lp-primary-button,.lp-dark-button,.lp-light-button { width:100%; min-height:52px; padding:0 20px; text-align:center; }
   .lp-hero-image { height:175px; }
+  .lp-hero-image img { filter:none; }
   .lp-lead-form { padding:25px 20px; }
   .lp-lead-form input,.lp-lead-form select,.lp-lead-form textarea { font-size:1rem; }
   .lp-proof { grid-template-columns:1fr; padding:0 20px; }

@@ -2,6 +2,7 @@
 import { handleImageOptimization, DEFAULT_DEVICE_SIZES, DEFAULT_IMAGE_SIZES } from "vinext/server/image-optimization";
 import handler from "vinext/server/app-router-entry";
 import { normalizeTrackingRequestForRender } from "../lib/request-normalization";
+import { STATIC_HTML_PAGE_PATHS, staticHtmlAssetRequestPath } from "../lib/static-html";
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -21,19 +22,20 @@ interface ExecutionContext {
 
 const APEX_HOST = "integradaneuropsicologia.com.br";
 const WWW_SITE_URL = "https://www.integradaneuropsicologia.com.br";
-const LANDING_PATH = "/avaliacao-neuropsicologica-online-adultos";
-const SITES_PAGE_PATHS = new Set([
-  LANDING_PATH,
-  `${LANDING_PATH}/como-funciona`,
-  `${LANDING_PATH}/para-quem`,
-  `${LANDING_PATH}/o-que-investiga`,
-  `${LANDING_PATH}/duvidas`,
-  `${LANDING_PATH}/avaliacoes`,
-  `${LANDING_PATH}/contato`,
-  "/politica-de-privacidade",
-]);
+const SITES_PAGE_PATHS = new Set<string>(STATIC_HTML_PAGE_PATHS);
 
 const HTML_CACHE_CONTROL = "public, max-age=0, s-maxage=86400, stale-while-revalidate=604800";
+const VINEXT_HTML_VARY = [
+  "RSC",
+  "Accept",
+  "Next-Router-State-Tree",
+  "Next-Router-Prefetch",
+  "Next-Router-Segment-Prefetch",
+  "Next-Url",
+  "X-Vinext-Interception-Context",
+  "X-Vinext-Mounted-Slots",
+  "X-Vinext-Rsc-Render-Mode",
+].join(", ");
 
 const normalizeSitesPagePath = (pathname: string) => {
   const withoutRsc = pathname.endsWith(".rsc") ? pathname.slice(0, -4) : pathname;
@@ -68,6 +70,45 @@ const cacheableResponse = (response: Response) => {
   return result;
 };
 
+const preRenderedHtmlResponse = async (request: Request, env: Env) => {
+  if (
+    request.headers.has("authorization") ||
+    request.headers.has("range") ||
+    request.headers.has("rsc") ||
+    request.headers.has("next-action") ||
+    request.headers.has("next-router-state-tree") ||
+    /(?:^|;\s*)__prerender_bypass=/.test(request.headers.get("cookie") ?? "")
+  ) return null;
+
+  const renderRequest = normalizeTrackingRequestForRender(request);
+  const renderUrl = new URL(renderRequest.url);
+  if (renderUrl.search) return null;
+
+  const assetPath = staticHtmlAssetRequestPath(renderUrl.pathname);
+  if (!assetPath) return null;
+
+  try {
+    const assetUrl = new URL(assetPath, request.url);
+    const assetResponse = await env.ASSETS.fetch(new Request(assetUrl, {
+      method: "GET",
+      headers: { accept: "text/html" },
+    }));
+    if (
+      assetResponse.status !== 200 ||
+      !assetResponse.headers.get("content-type")?.includes("text/html") ||
+      assetResponse.headers.has("set-cookie")
+    ) return null;
+
+    const response = cacheableResponse(assetResponse);
+    response.headers.set("Vary", VINEXT_HTML_VARY);
+    response.headers.set("X-Vinext-Cache", "STATIC");
+    response.headers.set("X-Integrada-Html-Cache", "HIT");
+    return response;
+  } catch {
+    return null;
+  }
+};
+
 // Image security config. SVG sources with .svg extension auto-skip the
 // optimization endpoint on the client side (served directly, no proxy).
 // To route SVGs through the optimizer (with security headers), set
@@ -77,6 +118,13 @@ const cacheableResponse = (response: Response) => {
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith("/integrada-static-html-cache/")) {
+      return new Response("Not found", {
+        status: 404,
+        headers: { "X-Robots-Tag": "noindex, nofollow, noarchive" },
+      });
+    }
 
     if (url.hostname === APEX_HOST && !isSitesPath(url.pathname)) {
       const mainSiteUrl = new URL(WWW_SITE_URL);
@@ -97,11 +145,20 @@ const worker = {
     }
 
     if (isCacheableHtmlRequest(request, url.pathname)) {
+      const preRenderedResponse = await preRenderedHtmlResponse(request, env);
+      if (preRenderedResponse) return preRenderedResponse;
+
       const renderRequest = normalizeTrackingRequestForRender(request);
       const response = await handler.fetch(renderRequest, env, ctx);
-      if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) return response;
+      if (
+        response.status !== 200 ||
+        !response.headers.get("content-type")?.includes("text/html") ||
+        response.headers.has("set-cookie")
+      ) return response;
 
-      return cacheableResponse(response);
+      const renderedResponse = cacheableResponse(response);
+      renderedResponse.headers.set("X-Integrada-Html-Cache", "MISS");
+      return renderedResponse;
     }
 
     return handler.fetch(request, env, ctx);

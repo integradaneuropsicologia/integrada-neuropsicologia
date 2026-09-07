@@ -65,12 +65,34 @@ export function GoogleTagManagerHead({ containerId }: { containerId: string | nu
       dangerouslySetInnerHTML={{
         __html: `
           (function(w,d,s,l,i){
-            w[l]=w[l]||[];
-            w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
-            var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
-            j.async=true;
-            j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-            f.parentNode.insertBefore(j,f);
+            var timer;
+            function cleanup(){
+              if(timer) w.clearTimeout(timer);
+              w.removeEventListener('pointerdown',load,true);
+              w.removeEventListener('touchstart',load,true);
+              w.removeEventListener('keydown',load,true);
+              w.removeEventListener('integrada:load-gtm',load);
+            }
+            function load(){
+              if(w.__integradaGtmLoaded) return;
+              w.__integradaGtmLoaded=true;
+              cleanup();
+              w[l]=w[l]||[];
+              w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+              var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+              j.async=true;
+              j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+              f.parentNode.insertBefore(j,f);
+            }
+            function schedule(){ timer=w.setTimeout(load,2500); }
+            w.integradaLoadGtm=load;
+            w.addEventListener('pointerdown',load,{capture:true,passive:true});
+            w.addEventListener('touchstart',load,{capture:true,passive:true});
+            w.addEventListener('keydown',load,true);
+            w.addEventListener('integrada:load-gtm',load);
+            if(/(?:^|[?&])gtm_(?:debug|preview|auth)=/i.test(w.location.search)) load();
+            else if(d.readyState==='complete') schedule();
+            else w.addEventListener('load',schedule,{once:true});
           })(window,document,'script','dataLayer',${JSON.stringify(containerId)});
         `,
       }}

@@ -207,6 +207,17 @@ test("adds consented GCLID, GBRAID or WBRAID only to the WhatsApp draft", () => 
   }
 });
 
+test("asks the deferred GTM loader to start before queuing a tracked interaction", () => {
+  const { window } = installWindow();
+  const calls = [];
+  window.integradaLoadGtm = () => calls.push(window.dataLayer.length);
+
+  trackWhatsAppClick("hero");
+
+  assert.deepEqual(calls, [0]);
+  assert.equal(window.dataLayer[0].event, "whatsapp_click");
+});
+
 test("does not append an ad reference without advertising consent", () => {
   const { window } = installWindow();
   window.location.href = "https://integradaneuropsicologia.com.br/avaliacao-neuropsicologica-online-adultos?gclid=AbC_123-test";

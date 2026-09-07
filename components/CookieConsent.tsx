@@ -126,6 +126,7 @@ export function CookieConsent() {
     }
     document.documentElement.setAttribute("data-integrada-cookie-consent", "stored");
     applyConsent(preference);
+    if (nextAnalytics || nextAds) window.integradaLoadGtm?.();
     if (nextAds) captureGoogleAdsClickReference();
     else clearGoogleAdsClickReference();
     setAnalytics(nextAnalytics);
